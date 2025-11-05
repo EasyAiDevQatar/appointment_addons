@@ -1,0 +1,418 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ _("Availability Settings") }}{% endblock %}
+
+{% block page_content %}
+<style>
+	.availability-container {
+		max-width: 900px;
+		margin: 40px auto;
+		padding: 30px;
+		background: #fff;
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+	}
+	
+	.availability-header {
+		margin-bottom: 30px;
+	}
+	
+	.availability-header h2 {
+		margin: 0 0 10px 0;
+	}
+	
+	.availability-header p {
+		color: #666;
+		margin: 0;
+	}
+	
+	.day-card {
+		border: 1px solid #e0e0e0;
+		border-radius: 8px;
+		padding: 20px;
+		margin-bottom: 15px;
+		background: #fff;
+	}
+	
+	.day-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 15px;
+		padding-bottom: 15px;
+		border-bottom: 1px solid #f0f0f0;
+	}
+	
+	.day-name {
+		font-size: 18px;
+		font-weight: 600;
+		color: #333;
+	}
+	
+	.toggle-switch {
+		position: relative;
+		display: inline-block;
+		width: 50px;
+		height: 24px;
+	}
+	
+	.toggle-switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+	
+	.toggle-slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ccc;
+		transition: .4s;
+		border-radius: 24px;
+	}
+	
+	.toggle-slider:before {
+		position: absolute;
+		content: "";
+		height: 18px;
+		width: 18px;
+		left: 3px;
+		bottom: 3px;
+		background-color: white;
+		transition: .4s;
+		border-radius: 50%;
+	}
+	
+	.toggle-switch input:checked + .toggle-slider {
+		background-color: #007bff;
+	}
+	
+	.toggle-switch input:checked + .toggle-slider:before {
+		transform: translateX(26px);
+	}
+	
+	.time-slots-container {
+		display: none;
+		margin-top: 15px;
+	}
+	
+	.time-slots-container.show {
+		display: block;
+	}
+	
+	.time-slot-row {
+		display: flex;
+		gap: 15px;
+		align-items: center;
+		margin-bottom: 10px;
+		padding: 10px;
+		background: #f8f9fa;
+		border-radius: 4px;
+	}
+	
+	.time-slot-input {
+		flex: 1;
+	}
+	
+	.time-slot-input label {
+		display: block;
+		font-size: 12px;
+		color: #666;
+		margin-bottom: 5px;
+	}
+	
+	.time-slot-input input {
+		width: 100%;
+		padding: 8px;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		font-size: 14px;
+	}
+	
+	.btn-remove-slot {
+		padding: 8px 12px;
+		background: #dc3545;
+		color: white;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 14px;
+	}
+	
+	.btn-remove-slot:hover {
+		background: #c82333;
+	}
+	
+	.btn-add-slot {
+		padding: 8px 16px;
+		background: #28a745;
+		color: white;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 14px;
+		margin-top: 10px;
+	}
+	
+	.btn-add-slot:hover {
+		background: #218838;
+	}
+	
+	.save-button-container {
+		margin-top: 30px;
+		text-align: center;
+	}
+	
+	.btn-save {
+		padding: 12px 40px;
+		background: #007bff;
+		color: white;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 16px;
+		font-weight: 600;
+	}
+	
+	.btn-save:hover {
+		background: #0056b3;
+	}
+	
+	.btn-save:disabled {
+		background: #6c757d;
+		cursor: not-allowed;
+	}
+	
+	.alert {
+		padding: 15px;
+		border-radius: 4px;
+		margin-bottom: 20px;
+	}
+	
+	.alert-success {
+		background: #d4edda;
+		color: #155724;
+		border: 1px solid #c3e6cb;
+	}
+	
+	.alert-danger {
+		background: #f8d7da;
+		color: #721c24;
+		border: 1px solid #f5c6cb;
+	}
+</style>
+
+<div class="availability-container">
+	<div class="availability-header">
+		<h2>{{ _("Availability Settings") }}</h2>
+		<p>{{ _("Set your available time slots for appointments") }}</p>
+	</div>
+	
+	{% if success_message %}
+	<div class="alert alert-success">
+		{{ success_message }}
+	</div>
+	{% endif %}
+	
+	<div id="alert-message" style="display: none;"></div>
+	
+	<form id="availability-form">
+		{% for day in days_of_week %}
+		<div class="day-card" data-day="{{ day }}">
+			<div class="day-header">
+				<div class="day-name">{{ _(day) }}</div>
+				<label class="toggle-switch">
+					<input type="checkbox" class="day-toggle" 
+					       {% if availability[day].is_available %}checked{% endif %}>
+					<span class="toggle-slider"></span>
+				</label>
+			</div>
+			
+			<div class="time-slots-container {% if availability[day].is_available %}show{% endif %}">
+				<div class="time-slots-list">
+					{% if availability[day].time_slots %}
+						{% for slot in availability[day].time_slots %}
+						<div class="time-slot-row">
+							<div class="time-slot-input">
+								<label>{{ _("From Time") }}</label>
+								<input type="time" class="from-time" value="{{ slot.from_time }}" required>
+							</div>
+							<div class="time-slot-input">
+								<label>{{ _("To Time") }}</label>
+								<input type="time" class="to-time" value="{{ slot.to_time }}" required>
+							</div>
+							<button type="button" class="btn-remove-slot" onclick="removeTimeSlot(this)">
+								{{ _("Remove") }}
+							</button>
+						</div>
+						{% endfor %}
+					{% else %}
+						<div class="time-slot-row">
+							<div class="time-slot-input">
+								<label>{{ _("From Time") }}</label>
+								<input type="time" class="from-time" value="09:00" required>
+							</div>
+							<div class="time-slot-input">
+								<label>{{ _("To Time") }}</label>
+								<input type="time" class="to-time" value="17:00" required>
+							</div>
+							<button type="button" class="btn-remove-slot" onclick="removeTimeSlot(this)">
+								{{ _("Remove") }}
+							</button>
+						</div>
+					{% endif %}
+				</div>
+				<button type="button" class="btn-add-slot" onclick="addTimeSlot(this)">
+					{{ _("+ Add Time Slot") }}
+				</button>
+			</div>
+		</div>
+		{% endfor %}
+		
+		<div class="save-button-container">
+			<button type="submit" class="btn-save" id="save-btn">{{ _("Save Settings") }}</button>
+		</div>
+	</form>
+</div>
+
+<script>
+	// Toggle day availability
+	document.querySelectorAll('.day-toggle').forEach(toggle => {
+		toggle.addEventListener('change', function() {
+			const card = this.closest('.day-card');
+			const slotsContainer = card.querySelector('.time-slots-container');
+			
+			if (this.checked) {
+				slotsContainer.classList.add('show');
+			} else {
+				slotsContainer.classList.remove('show');
+			}
+		});
+	});
+	
+	// Add time slot
+	function addTimeSlot(button) {
+		const slotsList = button.previousElementSibling;
+		const newSlot = document.createElement('div');
+		newSlot.className = 'time-slot-row';
+		newSlot.innerHTML = `
+			<div class="time-slot-input">
+				<label>{{ _("From Time") }}</label>
+				<input type="time" class="from-time" value="09:00" required>
+			</div>
+			<div class="time-slot-input">
+				<label>{{ _("To Time") }}</label>
+				<input type="time" class="to-time" value="17:00" required>
+			</div>
+			<button type="button" class="btn-remove-slot" onclick="removeTimeSlot(this)">
+				{{ _("Remove") }}
+			</button>
+		`;
+		slotsList.appendChild(newSlot);
+	}
+	
+	// Remove time slot
+	function removeTimeSlot(button) {
+		const slotRow = button.closest('.time-slot-row');
+		const slotsList = slotRow.parentElement;
+		
+		// Keep at least one slot if day is available
+		if (slotsList.children.length > 1) {
+			slotRow.remove();
+		} else {
+			alert('{{ _("You must have at least one time slot for available days") }}');
+		}
+	}
+	
+	// Handle form submission
+	document.getElementById('availability-form').addEventListener('submit', function(e) {
+		e.preventDefault();
+		
+		const saveBtn = document.getElementById('save-btn');
+		const alertDiv = document.getElementById('alert-message');
+		
+		// Disable save button
+		saveBtn.disabled = true;
+		saveBtn.textContent = '{{ _("Saving...") }}';
+		
+		// Collect data
+		const data = [];
+		document.querySelectorAll('.day-card').forEach(card => {
+			const day = card.getAttribute('data-day');
+			const toggle = card.querySelector('.day-toggle');
+			const isAvailable = toggle.checked ? 1 : 0;
+			const timeSlots = [];
+			
+			if (isAvailable) {
+				card.querySelectorAll('.time-slot-row').forEach(row => {
+					const fromTime = row.querySelector('.from-time').value;
+					const toTime = row.querySelector('.to-time').value;
+					
+					if (fromTime && toTime) {
+						timeSlots.push({
+							from_time: fromTime,
+							to_time: toTime
+						});
+					}
+				});
+			}
+			
+			data.push({
+				day: day,
+				is_available: isAvailable,
+				time_slots: timeSlots
+			});
+		});
+		
+		// Submit using XMLHttpRequest
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', '/api/method/appointment_addons.www.availability-settings.save_availability', true);
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.setRequestHeader('X-Frappe-CSRF-Token', frappe.csrf_token || '');
+		
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+				const response = JSON.parse(xhr.responseText);
+				if (response.message && response.message.success) {
+					alertDiv.className = 'alert alert-success';
+					alertDiv.textContent = response.message.message;
+					alertDiv.style.display = 'block';
+					
+					// Scroll to top to show message
+					window.scrollTo({ top: 0, behavior: 'smooth' });
+					
+					// Re-enable button
+					saveBtn.disabled = false;
+					saveBtn.textContent = '{{ _("Save Settings") }}';
+				} else {
+					alertDiv.className = 'alert alert-danger';
+					alertDiv.textContent = response.message ? response.message.message : '{{ _("An error occurred. Please try again.") }}';
+					alertDiv.style.display = 'block';
+					saveBtn.disabled = false;
+					saveBtn.textContent = '{{ _("Save Settings") }}';
+				}
+			} else {
+				alertDiv.className = 'alert alert-danger';
+				alertDiv.textContent = '{{ _("An error occurred. Please try again.") }}';
+				alertDiv.style.display = 'block';
+				saveBtn.disabled = false;
+				saveBtn.textContent = '{{ _("Save Settings") }}';
+			}
+		};
+		
+		xhr.onerror = function() {
+			alertDiv.className = 'alert alert-danger';
+			alertDiv.textContent = '{{ _("Network error. Please check your connection and try again.") }}';
+			alertDiv.style.display = 'block';
+			saveBtn.disabled = false;
+			saveBtn.textContent = '{{ _("Save Settings") }}';
+		};
+		
+		xhr.send(JSON.stringify({ data: JSON.stringify(data) }));
+	});
+</script>
+
+{% endblock %}
