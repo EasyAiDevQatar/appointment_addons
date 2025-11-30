@@ -212,3 +212,15 @@ def send_confirmation_email(doc):
 		)
 	)
 
+
+
+
+
+
+
+
+
+
+
+
+

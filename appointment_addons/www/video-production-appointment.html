@@ -1,11 +1,11 @@
 {% extends "templates/web.html" %}
 
-{% block title %}{{ _("Book Appointment") }}{% endblock %}
+{% block title %}{{ _("Video Production Appointment") }}{% endblock %}
 
 {% block page_content %}
 <style>
 	.appointment-container {
-		max-width: 800px;
+		max-width: 900px;
 		margin: 40px auto;
 		padding: 30px;
 		background: #fff;
@@ -67,7 +67,13 @@
 	}
 	
 	.form-section {
+		margin-bottom: 30px;
+	}
+	
+	.form-section h3 {
 		margin-bottom: 20px;
+		color: #333;
+		font-size: 24px;
 	}
 	
 	.form-group {
@@ -86,17 +92,30 @@
 		color: red;
 	}
 	
+	.form-group .description {
+		font-size: 12px;
+		color: #666;
+		margin-top: 5px;
+		font-style: italic;
+	}
+	
 	.form-control {
 		width: 100%;
-		padding: 10px;
+		padding: 12px;
 		border: 1px solid #ddd;
 		border-radius: 4px;
 		font-size: 14px;
+		box-sizing: border-box;
 	}
 	
 	.form-control:focus {
 		outline: none;
 		border-color: #007bff;
+	}
+	
+	textarea.form-control {
+		min-height: 100px;
+		resize: vertical;
 	}
 	
 	.btn-container {
@@ -112,6 +131,7 @@
 		cursor: pointer;
 		font-size: 16px;
 		font-weight: 600;
+		transition: all 0.3s;
 	}
 	
 	.btn-primary {
@@ -123,6 +143,11 @@
 		background: #0056b3;
 	}
 	
+	.btn-primary:disabled {
+		background: #6c757d;
+		cursor: not-allowed;
+	}
+	
 	.btn-secondary {
 		background: #6c757d;
 		color: white;
@@ -132,64 +157,99 @@
 		background: #545b62;
 	}
 	
-	.services-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-		gap: 15px;
-		margin-top: 20px;
+	.alert {
+		padding: 15px;
+		border-radius: 4px;
+		margin-bottom: 20px;
 	}
 	
-	.service-card {
+	.alert-success {
+		background: #d4edda;
+		color: #155724;
+		border: 1px solid #c3e6cb;
+	}
+	
+	.alert-danger {
+		background: #f8d7da;
+		color: #721c24;
+		border: 1px solid #f5c6cb;
+	}
+	
+	.alert-info {
+		background: #d1ecf1;
+		color: #0c5460;
+		border: 1px solid #bee5eb;
+	}
+	
+	.step-content {
+		display: none;
+	}
+	
+	.step-content.active {
+		display: block;
+	}
+	
+	.appointment-type-options {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 20px;
+		margin: 20px 0;
+	}
+	
+	.appointment-type-option {
 		border: 2px solid #e0e0e0;
 		border-radius: 8px;
 		padding: 20px;
 		cursor: pointer;
+		text-align: center;
 		transition: all 0.3s;
 	}
 	
-	.service-card:hover {
+	.appointment-type-option:hover {
 		border-color: #007bff;
-		box-shadow: 0 2px 8px rgba(0,123,255,0.2);
 	}
 	
-	.service-card.selected {
+	.appointment-type-option.selected {
 		border-color: #007bff;
 		background: #e7f3ff;
 	}
 	
-	.service-card-header {
-		display: flex;
-		align-items: center;
-		margin-bottom: 10px;
+	.appointment-type-option h4 {
+		margin: 0 0 10px 0;
+		color: #333;
 	}
 	
-	.service-card-color {
-		width: 20px;
-		height: 20px;
+	.info-box {
+		background: #fff3cd;
+		border: 1px solid #ffc107;
 		border-radius: 4px;
-		margin-right: 10px;
-	}
-	
-	.service-card-title {
-		font-weight: 600;
-		font-size: 16px;
-	}
-	
-	.service-card-description {
+		padding: 15px;
+		margin: 15px 0;
+		color: #856404;
 		font-size: 14px;
-		color: #666;
-		margin-bottom: 10px;
+		line-height: 1.6;
 	}
 	
-	.service-card-duration {
-		font-size: 13px;
-		color: #007bff;
-		font-weight: 600;
-		background: #e7f3ff;
-		padding: 5px 10px;
-		border-radius: 4px;
-		display: inline-block;
-		margin-top: 8px;
+	.info-box.warning {
+		background: #f8d7da;
+		border-color: #dc3545;
+		color: #721c24;
+	}
+	
+	.checkbox-group {
+		display: flex;
+		align-items: flex-start;
+		margin: 15px 0;
+	}
+	
+	.checkbox-group input[type="checkbox"] {
+		margin-right: 10px;
+		margin-top: 3px;
+	}
+	
+	.checkbox-group label {
+		font-weight: normal;
+		cursor: pointer;
 	}
 	
 	.location-options {
@@ -243,12 +303,6 @@
 		margin-top: 20px;
 	}
 	
-	@media (max-width: 768px) {
-		.date-time-container {
-			grid-template-columns: 1fr;
-		}
-	}
-	
 	.date-picker-section,
 	.time-picker-section {
 		border: 1px solid #e0e0e0;
@@ -262,20 +316,6 @@
 		font-size: 16px;
 		margin-bottom: 15px;
 		color: #333;
-	}
-	
-	.date-input {
-		width: 100%;
-		padding: 12px;
-		border: 2px solid #ddd;
-		border-radius: 4px;
-		font-size: 16px;
-		background: white;
-	}
-	
-	.date-input:focus {
-		outline: none;
-		border-color: #007bff;
 	}
 	
 	.available-dates-list {
@@ -360,132 +400,61 @@
 		font-style: italic;
 	}
 	
-	.alert {
-		padding: 15px;
-		border-radius: 4px;
-		margin-bottom: 20px;
-	}
-	
-	.alert-success {
-		background: #d4edda;
-		color: #155724;
-		border: 1px solid #c3e6cb;
-	}
-	
-	.alert-danger {
-		background: #f8d7da;
-		color: #721c24;
-		border: 1px solid #f5c6cb;
-	}
-	
-	.step-content {
-		display: none;
-	}
-	
-	.step-content.active {
-		display: block;
-	}
-	
-	.appointment-type-options {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 20px;
-		margin: 20px 0;
-	}
-	
-	.appointment-type-option {
-		border: 2px solid #e0e0e0;
-		border-radius: 8px;
-		padding: 20px;
-		cursor: pointer;
-		text-align: center;
-		transition: all 0.3s;
-	}
-	
-	.appointment-type-option:hover {
-		border-color: #007bff;
-	}
-	
-	.appointment-type-option.selected {
-		border-color: #007bff;
-		background: #e7f3ff;
-	}
-	
-	.appointment-type-option h4 {
-		margin: 0 0 10px 0;
-		color: #333;
-	}
-	
 	@media (max-width: 768px) {
 		.appointment-type-options {
 			grid-template-columns: 1fr;
+		}
+		
+		.location-options {
+			flex-direction: column;
+		}
+		
+		.date-time-container {
+			grid-template-columns: 1fr;
+		}
+		
+		.appointment-container {
+			padding: 20px;
+			margin: 20px;
 		}
 	}
 </style>
 
 <div class="appointment-container">
-	<h2 style="text-align: center; margin-bottom: 30px;">{{ _("Book an Appointment") }}</h2>
+	<h2 style="text-align: center; margin-bottom: 30px;">{{ _("Video Production Appointment") }}</h2>
 	
 	<!-- Progress Bar -->
 	<div class="progress-bar-container" id="progress-bar">
-		<div class="progress-step" data-step="0">
-			<div class="progress-step-circle">1</div>
-			<div class="progress-step-label">{{ _("Company") }}</div>
-		</div>
 		<div class="progress-step" data-step="1">
-			<div class="progress-step-circle">2</div>
+			<div class="progress-step-circle">1</div>
 			<div class="progress-step-label">{{ _("Information") }}</div>
 		</div>
 		<div class="progress-step" data-step="2">
-			<div class="progress-step-circle">3</div>
-			<div class="progress-step-label">{{ _("Services") }}</div>
+			<div class="progress-step-circle">2</div>
+			<div class="progress-step-label">{{ _("Appointment Details") }}</div>
 		</div>
 		<div class="progress-step" data-step="3">
-			<div class="progress-step-circle">4</div>
+			<div class="progress-step-circle">3</div>
 			<div class="progress-step-label">{{ _("Location") }}</div>
 		</div>
 		<div class="progress-step" data-step="4">
-			<div class="progress-step-circle">5</div>
+			<div class="progress-step-circle">4</div>
 			<div class="progress-step-label">{{ _("Date & Time") }}</div>
 		</div>
 	</div>
 	
-	<!-- Step 0: Company Selection -->
-	<div class="step-content active" id="step-0">
-		<div class="form-section">
-			<h3>{{ _("Select Company") }}</h3>
-			
-			<div class="appointment-type-options">
-				<div class="appointment-type-option" onclick="selectCompany('Easy AI')">
-					<h4>{{ _("Easy AI") }}</h4>
-					<p>{{ _("Book appointment with Easy AI") }}</p>
-				</div>
-				
-				<div class="appointment-type-option" onclick="selectCompany('Directlines')">
-					<h4>{{ _("Directlines") }}</h4>
-					<p>{{ _("Video Production Appointment") }}</p>
-				</div>
-			</div>
-		</div>
-		
-		<div class="btn-container">
-			<div></div>
-			<button class="btn btn-primary" id="company-next-btn" onclick="proceedAfterCompanySelection()" disabled>{{ _("Next") }}</button>
-		</div>
-	</div>
-	
 	<!-- Step 1: Customer Information -->
-	<div class="step-content" id="step-1">
+	<div class="step-content active" id="step-1">
 		<div class="form-section">
-			<h3>{{ _("Customer Information") }}</h3>
+			<h3>{{ _("Information - العنوان") }}</h3>
 			
 			<div class="form-group">
-				<label class="required">{{ _("Customer Name") }}</label>
+				<label class="required">{{ _("Name") }}</label>
 				<input type="text" id="customer_name" class="form-control" required>
 			</div>
 			
 			<div class="form-group">
-				<label class="required">{{ _("Phone Number") }}</label>
+				<label class="required">{{ _("Number") }}</label>
 				<input type="tel" id="phone_number" class="form-control" required>
 			</div>
 			
@@ -496,19 +465,105 @@
 		</div>
 		
 		<div class="btn-container">
-			<button class="btn btn-secondary" onclick="goToStep(0)">{{ _("Back") }}</button>
+			<div></div>
 			<button class="btn btn-primary" onclick="goToStep(2)">{{ _("Next") }}</button>
 		</div>
 	</div>
 	
-	<!-- Step 2: Services Selection -->
+	<!-- Step 2: Appointment Type and Details -->
 	<div class="step-content" id="step-2">
 		<div class="form-section">
-			<h3>{{ _("Select Services") }}</h3>
-			<p>{{ _("Select one or more services you want") }}</p>
+			<h3>{{ _("Appointment Type") }}</h3>
 			
-			<div class="services-grid" id="services-grid">
-				<div style="padding: 20px; text-align: center;">{{ _("Loading services...") }}</div>
+			<div class="appointment-type-options">
+				<div class="appointment-type-option" onclick="selectAppointmentType('New Customer')">
+					<h4>{{ _("New Customer") }}</h4>
+					<p>{{ _("I am a new customer") }}</p>
+				</div>
+				
+				<div class="appointment-type-option" onclick="selectAppointmentType('Current Active Client')">
+					<h4>{{ _("Current Active Client") }}</h4>
+					<p>{{ _("I am an existing active client") }}</p>
+				</div>
+			</div>
+			
+			<!-- New Customer Form -->
+			<div id="new-customer-form" style="display: none;">
+				<h3 style="margin-top: 30px;">{{ _("New Customer Details") }}</h3>
+				
+				<div class="form-group">
+					<label class="required">{{ _("Industry") }}</label>
+					<select id="industry" class="form-control" required>
+						<option value="">{{ _("Select Industry") }}</option>
+						<option value="Restaurant">{{ _("Restaurant") }}</option>
+						<option value="Company">{{ _("Company") }}</option>
+						<option value="Factory">{{ _("Factory") }}</option>
+						<option value="Clinic">{{ _("Clinic") }}</option>
+						<option value="Medical Center">{{ _("Medical Center") }}</option>
+					</select>
+				</div>
+				
+				<div class="form-group">
+					<label class="required">{{ _("Requirements") }}</label>
+					<select id="requirements" class="form-control" required>
+						<option value="">{{ _("Select Requirements") }}</option>
+						<option value="Photos">{{ _("Photos") }}</option>
+						<option value="Videos">{{ _("Videos") }}</option>
+						<option value="Both">{{ _("Both") }}</option>
+					</select>
+				</div>
+				
+				<div class="form-group">
+					<label class="required">{{ _("Budget") }}</label>
+					<select id="budget" class="form-control" required>
+						<option value="">{{ _("Select Budget") }}</option>
+						<option value="Low">{{ _("Low") }}</option>
+						<option value="Medium">{{ _("Medium") }}</option>
+						<option value="Open">{{ _("Open") }}</option>
+					</select>
+				</div>
+				
+				<div class="form-group">
+					<label>{{ _("Notes") }}</label>
+					<textarea id="notes" class="form-control" readonly>Please check our previous projects and determine your requirements and one of our sales team will contact you ASAP</textarea>
+				</div>
+				
+				<div class="form-group">
+					<label>{{ _("References") }}</label>
+					<textarea id="references" class="form-control" placeholder="Here you can share links from videos and photos that you like"></textarea>
+					<div class="description">{{ _("Here you can share links from videos and photos that you like") }}</div>
+				</div>
+			</div>
+			
+			<!-- Current Active Client Form -->
+			<div id="current-client-form" style="display: none;">
+				<h3 style="margin-top: 30px;">{{ _("Current Active Client Details") }}</h3>
+				
+				<div class="info-box warning">
+					<strong>{{ _("Note:") }}</strong> {{ _("Please make sure you are an active client with us. If you are not a client with us, the appointment will be cancelled automatically.") }}
+				</div>
+				
+				<div class="form-group">
+					<label class="required">{{ _("Name of Your Brand") }}</label>
+					<input type="text" id="brand_name" class="form-control" required>
+				</div>
+				
+				
+				<div class="info-box">
+					<strong>{{ _("Note 1:") }}</strong> {{ _("If you want to cancel, you should cancel before 48 H at least or we will consider the shoot are done.") }}<br>
+					<strong>{{ _("Note 2:") }}</strong> {{ _("Storyboard and mood board will be discussed with operation manager before shooting.") }}
+				</div>
+				
+				<div class="checkbox-group">
+					<input type="checkbox" id="acknowledgment_checkbox" required>
+					<label for="acknowledgment_checkbox">{{ _("I acknowledge the cancellation policy") }}</label>
+				</div>
+				
+				<div class="form-group">
+					<label>{{ _("References") }}</label>
+					<textarea id="current_client_references" class="form-control" placeholder="Here you can share links from videos and photos that you like"></textarea>
+					<div class="description">{{ _("Here you can share links from videos and photos that you like") }}</div>
+				</div>
 			</div>
 		</div>
 		
@@ -605,7 +660,7 @@
 		
 		<div class="btn-container">
 			<button class="btn btn-secondary" onclick="goToStep(3)">{{ _("Back") }}</button>
-			<button class="btn btn-primary" id="submit-btn" onclick="submitBooking()">{{ _("Book Appointment") }}</button>
+			<button class="btn btn-primary" id="submit-btn" onclick="submitAppointment()">{{ _("Submit") }}</button>
 		</div>
 	</div>
 </div>
@@ -613,21 +668,32 @@
 <script>
 // App state
 const appState = {
-	currentStep: 0,
-	company: '',
+	currentStep: 1,
+	company: 'Directlines', // Always Directlines for this page
 	customerName: '',
 	phoneNumber: '',
 	email: '',
-	selectedServices: [],
+	appointmentType: '',
+	// New Customer fields
+	industry: '',
+	requirements: '',
+	budget: '',
+	notes: '',
+	references: '',
+	// Current Active Client fields
+	brandName: '',
+	acknowledgmentCheckbox: false,
+	currentClientReferences: '',
+	// Location fields
 	meetingLocation: '',
 	location: '',
 	streetName: '',
 	buildingName: '',
 	apartmentNumber: '',
+	companyLocation: '',
+	// Date & Time fields
 	bookingDate: '',
 	bookingTime: '',
-	services: [],
-	companyLocation: '',
 	availableSlots: [],
 	selectedDate: null,
 	slotsByDate: {}
@@ -635,7 +701,6 @@ const appState = {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-	loadServices();
 	loadCompanyLocation();
 	loadTimeSlots();
 	updateProgressBar();
@@ -643,15 +708,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Navigation
 function goToStep(step) {
-	// Validate current step before moving forward (skip validation for step 0)
-	if (step > appState.currentStep && step > 0 && !validateCurrentStep()) {
+	// Validate current step before moving forward
+	if (step > appState.currentStep && !validateCurrentStep()) {
 		return;
 	}
 	
 	// Save current step data
-	if (appState.currentStep > 0) {
-		saveStepData(appState.currentStep);
-	}
+	saveStepData(appState.currentStep);
 	
 	// Hide all steps
 	document.querySelectorAll('.step-content').forEach(el => {
@@ -686,44 +749,8 @@ function updateProgressBar() {
 	});
 }
 
-function selectCompany(company) {
-	appState.company = company;
-	
-	// Update visual selection
-	document.querySelectorAll('.appointment-type-option').forEach(opt => {
-		opt.classList.remove('selected');
-	});
-	event.currentTarget.classList.add('selected');
-	
-	// Enable next button
-	document.getElementById('company-next-btn').disabled = false;
-}
-
-function proceedAfterCompanySelection() {
-	if (!appState.company) {
-		alert('{{ _("Please select a company") }}');
-		return;
-	}
-	
-	// If Directlines, redirect to video-production-appointment page
-	if (appState.company === 'Directlines') {
-		window.location.href = '/video-production-appointment';
-		return;
-	}
-	
-	// If Easy AI, continue to next step
-	goToStep(1);
-}
-
 function validateCurrentStep() {
 	const step = appState.currentStep;
-	
-	if (step === 0) {
-		if (!appState.company) {
-			alert('{{ _("Please select a company") }}');
-			return false;
-		}
-	}
 	
 	if (step === 1) {
 		const name = document.getElementById('customer_name').value.trim();
@@ -742,9 +769,28 @@ function validateCurrentStep() {
 	}
 	
 	if (step === 2) {
-		if (appState.selectedServices.length === 0) {
-			alert('{{ _("Please select at least one service") }}');
+		if (!appState.appointmentType) {
+			alert('{{ _("Please select an appointment type") }}');
 			return false;
+		}
+		
+		if (appState.appointmentType === 'New Customer') {
+			const industry = document.getElementById('industry').value;
+			const requirements = document.getElementById('requirements').value;
+			const budget = document.getElementById('budget').value;
+			
+			if (!industry || !requirements || !budget) {
+				alert('{{ _("Please fill in all required fields for New Customer") }}');
+				return false;
+			}
+		} else {
+			const brandName = document.getElementById('brand_name').value.trim();
+			const acknowledgment = document.getElementById('acknowledgment_checkbox').checked;
+			
+			if (!brandName || !acknowledgment) {
+				alert('{{ _("Please fill in all required fields and acknowledge the cancellation policy") }}');
+				return false;
+			}
 		}
 	}
 	
@@ -778,14 +824,24 @@ function validateCurrentStep() {
 }
 
 function saveStepData(step) {
-	if (step === 0) {
-		// Company is already saved in appState.company
-	}
-	
 	if (step === 1) {
 		appState.customerName = document.getElementById('customer_name').value;
 		appState.phoneNumber = document.getElementById('phone_number').value;
 		appState.email = document.getElementById('email').value;
+	}
+	
+	if (step === 2) {
+		if (appState.appointmentType === 'New Customer') {
+			appState.industry = document.getElementById('industry').value;
+			appState.requirements = document.getElementById('requirements').value;
+			appState.budget = document.getElementById('budget').value;
+			appState.notes = document.getElementById('notes').value;
+			appState.references = document.getElementById('references').value;
+		} else {
+			appState.brandName = document.getElementById('brand_name').value;
+			appState.acknowledgmentCheckbox = document.getElementById('acknowledgment_checkbox').checked;
+			appState.currentClientReferences = document.getElementById('current_client_references').value;
+		}
 	}
 	
 	if (step === 3) {
@@ -798,60 +854,6 @@ function saveStepData(step) {
 	}
 }
 
-// Load Services
-function loadServices() {
-	frappe.call({
-		method: 'appointment_addons.www.book-appointment.get_services',
-		callback: function(r) {
-			if (r.message) {
-				appState.services = r.message;
-				renderServices();
-			}
-		}
-	});
-}
-
-function renderServices() {
-	const grid = document.getElementById('services-grid');
-	
-	if (appState.services.length === 0) {
-		grid.innerHTML = '<div class="alert alert-danger">{{ _("No services available at the moment. Please contact the administrator.") }}</div>';
-		return;
-	}
-	
-	grid.innerHTML = '';
-	appState.services.forEach(service => {
-		const card = document.createElement('div');
-		card.className = 'service-card';
-		card.onclick = () => toggleService(service.name);
-		
-		card.innerHTML = `
-			<div class="service-card-header">
-				<div class="service-card-color" style="background: ${service.color || '#007bff'};"></div>
-				<div class="service-card-title">${service.service_name}</div>
-			</div>
-			${service.description ? `<div class="service-card-description">${service.description}</div>` : ''}
-			<div class="service-card-duration">⏱️ ${service.duration} {{ _("minutes") }}</div>
-		`;
-		
-		if (appState.selectedServices.includes(service.name)) {
-			card.classList.add('selected');
-		}
-		
-		grid.appendChild(card);
-	});
-}
-
-function toggleService(serviceName) {
-	const index = appState.selectedServices.indexOf(serviceName);
-	if (index > -1) {
-		appState.selectedServices.splice(index, 1);
-	} else {
-		appState.selectedServices.push(serviceName);
-	}
-	renderServices();
-}
-
 // Load Company Location
 function loadCompanyLocation() {
 	frappe.call({
@@ -859,7 +861,10 @@ function loadCompanyLocation() {
 		callback: function(r) {
 			if (r.message) {
 				appState.companyLocation = r.message;
-				document.getElementById('company-location-text').textContent = r.message || '{{ _("Location not set. Please contact administrator.") }}';
+				const locationText = document.getElementById('company-location-text');
+				if (locationText) {
+					locationText.textContent = r.message || '{{ _("Location not set. Please contact administrator.") }}';
+				}
 			}
 		}
 	});
@@ -880,11 +885,11 @@ function selectLocation(locationType) {
 	const customerForm = document.getElementById('customer-location-form');
 	
 	if (locationType === 'Our Location') {
-		companyDisplay.classList.add('show');
-		customerForm.classList.remove('show');
+		if (companyDisplay) companyDisplay.classList.add('show');
+		if (customerForm) customerForm.classList.remove('show');
 	} else {
-		companyDisplay.classList.remove('show');
-		customerForm.classList.add('show');
+		if (companyDisplay) companyDisplay.classList.remove('show');
+		if (customerForm) customerForm.classList.add('show');
 	}
 }
 
@@ -920,6 +925,8 @@ function groupSlotsByDate() {
 
 function renderAvailableDates() {
 	const container = document.getElementById('available-dates-container');
+	if (!container) return;
+	
 	const dates = Object.values(appState.slotsByDate);
 	
 	if (dates.length === 0) {
@@ -965,6 +972,8 @@ function selectDate(date) {
 
 function renderTimeSlotsForDate(date) {
 	const container = document.getElementById('time-slots-container');
+	if (!container) return;
+	
 	const dateInfo = appState.slotsByDate[date];
 	
 	if (!dateInfo || dateInfo.slots.length === 0) {
@@ -995,39 +1004,75 @@ function selectTimeSlot(time) {
 	renderTimeSlotsForDate(appState.selectedDate);
 }
 
-// Submit Booking
-function submitBooking() {
+function selectAppointmentType(type) {
+	appState.appointmentType = type;
+	
+	// Update visual selection
+	document.querySelectorAll('.appointment-type-option').forEach(opt => {
+		opt.classList.remove('selected');
+	});
+	event.currentTarget.classList.add('selected');
+	
+	// Show/hide forms
+	const newCustomerForm = document.getElementById('new-customer-form');
+	const currentClientForm = document.getElementById('current-client-form');
+	
+	if (type === 'New Customer') {
+		newCustomerForm.style.display = 'block';
+		currentClientForm.style.display = 'none';
+	} else {
+		newCustomerForm.style.display = 'none';
+		currentClientForm.style.display = 'block';
+	}
+}
+
+// Submit Appointment
+function submitAppointment() {
 	if (!validateCurrentStep()) {
 		return;
 	}
+	
+	// Save all data
+	saveStepData(2);
+	saveStepData(3);
 	
 	const submitBtn = document.getElementById('submit-btn');
 	const alertDiv = document.getElementById('alert-message');
 	
 	// Disable submit button
 	submitBtn.disabled = true;
-	submitBtn.textContent = '{{ _("Booking...") }}';
+	submitBtn.textContent = '{{ _("Submitting...") }}';
 	
 	// Prepare data
 	const data = {
-		company: appState.company || 'Easy AI',
+		company: appState.company,
 		customer_name: appState.customerName,
 		phone_number: appState.phoneNumber,
 		email: appState.email,
-		selected_services: JSON.stringify(appState.selectedServices),
+		appointment_type: appState.appointmentType,
+		industry: appState.industry,
+		requirements: appState.requirements,
+		budget: appState.budget,
+		notes: appState.notes,
+		references: appState.references,
+		brand_name: appState.brandName,
+		acknowledgment_checkbox: appState.acknowledgmentCheckbox ? 1 : 0,
+		current_client_references: appState.currentClientReferences,
+		// Location data
 		meeting_location: appState.meetingLocation,
 		location: appState.location,
 		street_name: appState.streetName,
 		building_name: appState.buildingName,
 		apartment_number: appState.apartmentNumber,
+		// Date & Time data
 		booking_date: appState.bookingDate,
 		booking_time: appState.bookingTime
 	};
 	
 	frappe.call({
-		method: 'appointment_addons.www.book-appointment.create_appointment',
+		method: 'appointment_addons.www.video-production-appointment.create_appointment',
 		args: {
-			data: JSON.stringify(data)
+			data: data
 		},
 		callback: function(r) {
 			if (r.message && r.message.success) {
@@ -1035,16 +1080,16 @@ function submitBooking() {
 				alertDiv.textContent = r.message.message;
 				alertDiv.style.display = 'block';
 				
-				// Reset and redirect after 3 seconds
+				// Reset form and redirect after 3 seconds
 				setTimeout(function() {
-					window.location.href = '/book-appointment';
+					window.location.href = '/video-production-appointment';
 				}, 3000);
 			} else {
 				alertDiv.className = 'alert alert-danger';
 				alertDiv.textContent = r.message ? r.message.message : '{{ _("An error occurred. Please try again.") }}';
 				alertDiv.style.display = 'block';
 				submitBtn.disabled = false;
-				submitBtn.textContent = '{{ _("Book Appointment") }}';
+				submitBtn.textContent = '{{ _("Submit") }}';
 			}
 		},
 		error: function() {
@@ -1052,10 +1097,11 @@ function submitBooking() {
 			alertDiv.textContent = '{{ _("Network error. Please check your connection and try again.") }}';
 			alertDiv.style.display = 'block';
 			submitBtn.disabled = false;
-			submitBtn.textContent = '{{ _("Book Appointment") }}';
+			submitBtn.textContent = '{{ _("Submit") }}';
 		}
 	});
 }
 </script>
 
 {% endblock %}
+
