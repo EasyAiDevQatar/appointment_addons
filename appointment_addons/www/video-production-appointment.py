@@ -44,8 +44,10 @@ def create_appointment(data):
 			frappe.throw(_("Booking Time is required"))
 		
 		# Validate company
-		company = data.get("company", "Directlines")
-		if company not in ["Easy AI", "Directlines"]:
+		company = data.get("company", "Direct Line")
+		if company in ["Direct Line", "Directlines"]:
+			company = "Direct Line"  # Normalize to "Direct Line"
+		if company not in ["Easy AI", "Direct Line"]:
 			frappe.throw(_("Invalid company selected"))
 		
 		# Create appointment document
@@ -66,6 +68,7 @@ def create_appointment(data):
 		# Add fields based on appointment type
 		if data.get("appointment_type") == "New Customer":
 			doc.industry = data.get("industry", "")
+			doc.service = data.get("service", "")
 			doc.requirements = data.get("requirements", "")
 			doc.budget = data.get("budget", "")
 			doc.notes = data.get("notes", "")
@@ -75,19 +78,22 @@ def create_appointment(data):
 			doc.acknowledgment_checkbox = data.get("acknowledgment_checkbox", 0)
 			doc.current_client_references = data.get("current_client_references", "")
 		
-		# Add location details
-		if data.get("meeting_location") == "Our Location":
-			# Get company location from settings
-			try:
-				settings = frappe.get_single("Appointment Settings")
-				if settings and settings.company_location:
-					doc.company_location = settings.company_location
-			except:
-				pass
-		else:  # Customer Location
+		# Add location details (always Customer Location for Direct Line)
+		doc.meeting_location = data.get("meeting_location", "Customer Location")
+		doc.google_location = data.get("google_location", "")
+		doc.city = data.get("city", "")
+		doc.zone_number = data.get("zone_number", "")
+		doc.street_number = data.get("street_number", "")
+		doc.building_number = data.get("building_number", "")
+		
+		# Keep old fields for backward compatibility if they exist
+		if data.get("location"):
 			doc.location = data.get("location", "")
+		if data.get("street_name"):
 			doc.street_name = data.get("street_name", "")
+		if data.get("building_name"):
 			doc.building_name = data.get("building_name", "")
+		if data.get("apartment_number"):
 			doc.apartment_number = data.get("apartment_number", "")
 		
 		# Insert document (this will trigger after_insert and send email)

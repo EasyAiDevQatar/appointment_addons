@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test Time Slots API</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 20px;
+			background: #f5f5f5;
+		}
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			background: white;
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		}
+		button {
+			background: #007bff;
+			color: white;
+			border: none;
+			padding: 10px 20px;
+			border-radius: 4px;
+			cursor: pointer;
+			margin: 5px;
+			font-size: 16px;
+		}
+		button:hover {
+			background: #0056b3;
+		}
+		#output {
+			background: #f8f9fa;
+			border: 1px solid #dee2e6;
+			padding: 15px;
+			border-radius: 4px;
+			margin-top: 20px;
+			overflow-x: auto;
+			white-space: pre-wrap;
+			word-wrap: break-word;
+		}
+		.info {
+			background: #d1ecf1;
+			padding: 15px;
+			border-radius: 4px;
+			margin-bottom: 20px;
+			border-left: 4px solid #0c5460;
+		}
+		.slot {
+			background: #e7f3ff;
+			padding: 8px;
+			margin: 5px 0;
+			border-radius: 3px;
+			border-left: 3px solid #007bff;
+		}
+		.error {
+			background: #f8d7da;
+			color: #721c24;
+			padding: 15px;
+			border-radius: 4px;
+			border-left: 4px solid #f5c6cb;
+		}
+		.success {
+			background: #d4edda;
+			color: #155724;
+			padding: 15px;
+			border-radius: 4px;
+			border-left: 4px solid #c3e6cb;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>🧪 Time Slots API Test</h1>
+		
+		<div class="info">
+			<strong>Instructions:</strong>
+			<ul style="margin: 10px 0 0 20px;">
+				<li>Click "Test Settings" to verify Appointment Booking Settings</li>
+				<li>Click "Test Time Slots" to see available slots</li>
+				<li>Check the browser console (F12) for detailed logs</li>
+			</ul>
+		</div>
+		
+		<button onclick="testSettings()">Test Settings</button>
+		<button onclick="testTimeSlots()">Test Time Slots</button>
+		<button onclick="clearOutput()">Clear Output</button>
+		
+		<div id="summary"></div>
+		<pre id="output"></pre>
+	</div>
+
+	<script>
+		function clearOutput() {
+			document.getElementById('output').textContent = '';
+			document.getElementById('summary').innerHTML = '';
+		}
+		
+		function testSettings() {
+			console.log('Testing settings...');
+			document.getElementById('output').textContent = 'Loading...';
+			
+			fetch('/api/method/appointment_addons.www.book_appointment.test_settings', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			})
+			.then(response => response.json())
+			.then(data => {
+				console.log('Settings response:', data);
+				document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+				
+				if (data.message && data.message.success) {
+					document.getElementById('summary').innerHTML = 
+						'<div class="success">' +
+						'<strong>✓ Settings Loaded Successfully</strong><br>' +
+						'Scheduling Enabled: ' + (data.message.enable_scheduling ? 'Yes' : 'No') + '<br>' +
+						'Appointment Duration: ' + data.message.appointment_duration + ' minutes<br>' +
+						'Advance Booking Days: ' + data.message.advance_booking_days + '<br>' +
+						'Availability Slots: ' + data.message.slots_count +
+						'</div>';
+				} else {
+					document.getElementById('summary').innerHTML = 
+						'<div class="error"><strong>✗ Settings Error</strong></div>';
+				}
+			})
+			.catch(error => {
+				console.error('Settings error:', error);
+				document.getElementById('output').textContent = 'Error: ' + error;
+				document.getElementById('summary').innerHTML = 
+					'<div class="error"><strong>✗ Network Error:</strong> ' + error + '</div>';
+			});
+		}
+
+		function testTimeSlots() {
+			console.log('Testing time slots...');
+			document.getElementById('output').textContent = 'Loading...';
+			
+			fetch('/api/method/appointment_addons.www.book_appointment.get_time_slots', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			})
+			.then(response => response.json())
+			.then(data => {
+				console.log('Time slots response:', data);
+				document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+				
+				if (data.message) {
+					const slots = data.message;
+					const count = slots.length;
+					
+					if (count > 0) {
+						let slotsHtml = '<div class="success"><strong>✓ Found ' + count + ' Available Slots</strong></div>';
+						slotsHtml += '<div style="margin-top: 10px;">';
+						
+						// Group by date
+						const byDate = {};
+						slots.forEach(slot => {
+							if (!byDate[slot.date]) {
+								byDate[slot.date] = [];
+							}
+							byDate[slot.date].push(slot);
+						});
+						
+						Object.keys(byDate).forEach(date => {
+							const dateSlots = byDate[date];
+							slotsHtml += '<h3>' + dateSlots[0].date_display + ' (' + dateSlots[0].day + ')</h3>';
+							dateSlots.forEach(slot => {
+								slotsHtml += '<div class="slot">' + slot.from_time + ' : ' + slot.to_time + '</div>';
+							});
+						});
+						
+						slotsHtml += '</div>';
+						document.getElementById('summary').innerHTML = slotsHtml;
+					} else {
+						document.getElementById('summary').innerHTML = 
+							'<div class="error">' +
+							'<strong>✗ No Slots Found</strong><br>' +
+							'Possible reasons:<br>' +
+							'• Current time has passed all available slots for today<br>' +
+							'• No availability configured for upcoming days<br>' +
+							'• Check server logs for errors' +
+							'</div>';
+					}
+				}
+			})
+			.catch(error => {
+				console.error('Time slots error:', error);
+				document.getElementById('output').textContent = 'Error: ' + error;
+				document.getElementById('summary').innerHTML = 
+					'<div class="error"><strong>✗ Network Error:</strong> ' + error + '</div>';
+			});
+		}
+		
+		// Auto-run tests on page load
+		window.addEventListener('load', function() {
+			console.log('Page loaded, running automatic tests...');
+			setTimeout(testSettings, 500);
+		});
+	</script>
+</body>
+</html>

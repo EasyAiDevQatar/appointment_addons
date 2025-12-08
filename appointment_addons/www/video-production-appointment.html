@@ -441,26 +441,33 @@
 			<div class="progress-step-circle">4</div>
 			<div class="progress-step-label">{{ _("Date & Time") }}</div>
 		</div>
+		<div class="progress-step" data-step="5">
+			<div class="progress-step-circle">✓</div>
+			<div class="progress-step-label">{{ _("Success") }}</div>
+		</div>
 	</div>
 	
 	<!-- Step 1: Customer Information -->
 	<div class="step-content active" id="step-1">
 		<div class="form-section">
-			<h3>{{ _("Information - العنوان") }}</h3>
+			<h3>{{ _("Information") }}</h3>
 			
 			<div class="form-group">
 				<label class="required">{{ _("Name") }}</label>
 				<input type="text" id="customer_name" class="form-control" required>
+				<div id="customer_name_error" class="field-error" style="display: none; color: red; font-size: 12px; margin-top: 5px;"></div>
 			</div>
 			
 			<div class="form-group">
 				<label class="required">{{ _("Number") }}</label>
 				<input type="tel" id="phone_number" class="form-control" required>
+				<div id="phone_number_error" class="field-error" style="display: none; color: red; font-size: 12px; margin-top: 5px;"></div>
 			</div>
 			
 			<div class="form-group">
 				<label class="required">{{ _("Email") }}</label>
 				<input type="email" id="email" class="form-control" required>
+				<div id="email_error" class="field-error" style="display: none; color: red; font-size: 12px; margin-top: 5px;"></div>
 			</div>
 		</div>
 		
@@ -493,13 +500,30 @@
 				
 				<div class="form-group">
 					<label class="required">{{ _("Industry") }}</label>
-					<select id="industry" class="form-control" required>
+					<select id="industry" class="form-control" required onchange="onIndustryChange()">
 						<option value="">{{ _("Select Industry") }}</option>
-						<option value="Restaurant">{{ _("Restaurant") }}</option>
-						<option value="Company">{{ _("Company") }}</option>
-						<option value="Factory">{{ _("Factory") }}</option>
-						<option value="Clinic">{{ _("Clinic") }}</option>
-						<option value="Medical Center">{{ _("Medical Center") }}</option>
+						<option value="Food & Hospitality">{{ _("Food & Hospitality") }}</option>
+						<option value="Healthcare">{{ _("Healthcare") }}</option>
+						<option value="Beauty & Fashion">{{ _("Beauty & Fashion") }}</option>
+						<option value="Real Estate">{{ _("Real Estate") }}</option>
+						<option value="Automotive">{{ _("Automotive") }}</option>
+						<option value="Education">{{ _("Education") }}</option>
+						<option value="Sports & Fitness">{{ _("Sports & Fitness") }}</option>
+						<option value="Technology & Digital Services">{{ _("Technology & Digital Services") }}</option>
+						<option value="Commerce & Retail">{{ _("Commerce & Retail") }}</option>
+						<option value="Professional Services">{{ _("Professional Services") }}</option>
+						<option value="Travel & Tourism">{{ _("Travel & Tourism") }}</option>
+						<option value="Construction & Contracting">{{ _("Construction & Contracting") }}</option>
+						<option value="Events & Entertainment">{{ _("Events & Entertainment") }}</option>
+						<option value="Finance">{{ _("Finance") }}</option>
+						<option value="Others">{{ _("Others") }}</option>
+					</select>
+				</div>
+				
+				<div class="form-group" id="service-group" style="display: none;">
+					<label class="required">{{ _("Service") }}</label>
+					<select id="service" class="form-control" required>
+						<option value="">{{ _("Select Service") }}</option>
 					</select>
 				</div>
 				
@@ -530,8 +554,8 @@
 				
 				<div class="form-group">
 					<label>{{ _("References") }}</label>
-					<textarea id="references" class="form-control" placeholder="Here you can share links from videos and photos that you like"></textarea>
-					<div class="description">{{ _("Here you can share links from videos and photos that you like") }}</div>
+					<div id="references-container" class="form-control" style="min-height: 100px; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word;" contenteditable="true"></div>
+					<input type="hidden" id="references" />
 				</div>
 			</div>
 			
@@ -550,8 +574,8 @@
 				
 				
 				<div class="info-box">
-					<strong>{{ _("Note 1:") }}</strong> {{ _("If you want to cancel, you should cancel before 48 H at least or we will consider the shoot are done.") }}<br>
-					<strong>{{ _("Note 2:") }}</strong> {{ _("Storyboard and mood board will be discussed with operation manager before shooting.") }}
+					<strong>{{ _("Note 1:") }}</strong> {{ _("If you want to cancel, you should cancel before 48H at least or we will consider the photoshoot is done.") }}<br>
+					<strong>{{ _("Note 2:") }}</strong> {{ _("Storyboard and mood board will be discussed with our operation manager before photoshoot.") }}
 				</div>
 				
 				<div class="checkbox-group">
@@ -561,8 +585,8 @@
 				
 				<div class="form-group">
 					<label>{{ _("References") }}</label>
-					<textarea id="current_client_references" class="form-control" placeholder="Here you can share links from videos and photos that you like"></textarea>
-					<div class="description">{{ _("Here you can share links from videos and photos that you like") }}</div>
+					<div id="current_client_references-container" class="form-control" style="min-height: 100px; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word;" contenteditable="true"></div>
+					<input type="hidden" id="current_client_references" />
 				</div>
 			</div>
 		</div>
@@ -576,50 +600,65 @@
 	<!-- Step 3: Location Selection -->
 	<div class="step-content" id="step-3">
 		<div class="form-section">
-			<h3>{{ _("Meeting Location") }}</h3>
-			
-			<div class="location-options">
-				<div class="location-option" onclick="selectLocation('Our Location')">
-					<div class="location-option-icon">🏢</div>
-					<div class="location-option-title">{{ _("Our Location") }}</div>
-				</div>
-				
-				<div class="location-option" onclick="selectLocation('Customer Location')">
-					<div class="location-option-icon">🏠</div>
-					<div class="location-option-title">{{ _("Customer Location") }}</div>
-				</div>
-			</div>
-			
-			<!-- Company Location Display -->
-			<div id="company-location-display" class="location-details">
-				<div class="form-group">
-					<label>{{ _("Our Location") }}</label>
-					<div style="padding: 15px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e0e0e0;" id="company-location-text">
-						{{ _("Loading...") }}
-					</div>
-				</div>
-			</div>
+			<h3>{{ _("Customer Location") }}</h3>
 			
 			<!-- Customer Location Form -->
-			<div id="customer-location-form" class="location-details">
+			<div id="customer-location-form" class="location-details show">
 				<div class="form-group">
-					<label class="required">{{ _("Location") }}</label>
-					<input type="text" id="location" class="form-control">
+					<label class="required">{{ _("Google location") }}</label>
+					<input type="text" id="google_location" class="form-control" placeholder="{{ _('Enter Google Maps location or coordinates') }}">
 				</div>
 				
 				<div class="form-group">
-					<label class="required">{{ _("Street Name") }}</label>
-					<input type="text" id="street_name" class="form-control">
+					<label class="required">{{ _("City") }}</label>
+					<select id="city" class="form-control" required>
+						<option value="">{{ _("Select City") }}</option>
+						<option value="Doha">{{ _("Doha") }}</option>
+						<option value="Al Rayyan">{{ _("Al Rayyan") }}</option>
+						<option value="Al Wakrah">{{ _("Al Wakrah") }}</option>
+						<option value="Umm Salal">{{ _("Umm Salal") }}</option>
+						<option value="Al Khor">{{ _("Al Khor") }}</option>
+						<option value="Al Shamal">{{ _("Al Shamal") }}</option>
+						<option value="Al Daayen">{{ _("Al Daayen") }}</option>
+						<option value="Al Shahaniya">{{ _("Al Shahaniya") }}</option>
+						<option value="Al Wukair">{{ _("Al Wukair") }}</option>
+						<option value="Al Thumama">{{ _("Al Thumama") }}</option>
+						<option value="Lusail">{{ _("Lusail") }}</option>
+						<option value="Mesaieed">{{ _("Mesaieed") }}</option>
+						<option value="Dukhan">{{ _("Dukhan") }}</option>
+						<option value="Ras Laffan">{{ _("Ras Laffan") }}</option>
+						<option value="Madinat Khalifa">{{ _("Madinat Khalifa") }}</option>
+						<option value="Al Gharrafa">{{ _("Al Gharrafa") }}</option>
+						<option value="Al Sadd">{{ _("Al Sadd") }}</option>
+						<option value="Al Mansoura">{{ _("Al Mansoura") }}</option>
+						<option value="Al Markhiya">{{ _("Al Markhiya") }}</option>
+						<option value="The Pearl">{{ _("The Pearl") }}</option>
+						<option value="West Bay">{{ _("West Bay") }}</option>
+						<option value="Al Waab">{{ _("Al Waab") }}</option>
+						<option value="Ain Khaled">{{ _("Ain Khaled") }}</option>
+						<option value="Abu Hamour">{{ _("Abu Hamour") }}</option>
+						<option value="Old Airport">{{ _("Old Airport") }}</option>
+						<option value="Muaither">{{ _("Muaither") }}</option>
+						<option value="Al Kheesa">{{ _("Al Kheesa") }}</option>
+						<option value="Al Mashaf">{{ _("Al Mashaf") }}</option>
+						<option value="Other Known Cities / Towns">{{ _("Other Known Cities / Towns") }}</option>
+					</select>
+					<div class="description" style="margin-top: 5px; color: #856404; font-style: italic;">{{ _("Note : Extra charge will be applied for Any Area outside Doha") }}</div>
 				</div>
 				
 				<div class="form-group">
-					<label class="required">{{ _("Building Name and Number") }}</label>
-					<input type="text" id="building_name" class="form-control">
+					<label class="required">{{ _("Zone Number") }}</label>
+					<input type="text" id="zone_number" class="form-control">
 				</div>
 				
 				<div class="form-group">
-					<label class="required">{{ _("Apartment Number") }}</label>
-					<input type="text" id="apartment_number" class="form-control">
+					<label class="required">{{ _("Street Number") }}</label>
+					<input type="text" id="street_number" class="form-control">
+				</div>
+				
+				<div class="form-group">
+					<label class="required">{{ _("Building Number") }}</label>
+					<input type="text" id="building_number" class="form-control">
 				</div>
 			</div>
 		</div>
@@ -663,6 +702,15 @@
 			<button class="btn btn-primary" id="submit-btn" onclick="submitAppointment()">{{ _("Submit") }}</button>
 		</div>
 	</div>
+	
+	<!-- Step 5: Success Page -->
+	<div class="step-content" id="step-5">
+		<div class="form-section" style="text-align: center; padding: 40px 20px;">
+			<div style="font-size: 80px; color: #28a745; margin-bottom: 20px;">✓</div>
+			<h2 style="color: #28a745; margin-bottom: 20px;">{{ _("our application has been submitted successfully") }}</h2>
+			<h3 style="color: #333; margin-top: 40px; margin-bottom: 20px;">{{ _("Be Ready at your Session") }}</h3>
+		</div>
+	</div>
 </div>
 
 <script>
@@ -676,6 +724,7 @@ const appState = {
 	appointmentType: '',
 	// New Customer fields
 	industry: '',
+	service: '',
 	requirements: '',
 	budget: '',
 	notes: '',
@@ -685,15 +734,17 @@ const appState = {
 	acknowledgmentCheckbox: false,
 	currentClientReferences: '',
 	// Location fields
-	meetingLocation: '',
-	location: '',
-	streetName: '',
-	buildingName: '',
-	apartmentNumber: '',
+	meetingLocation: 'Customer Location', // Always Customer Location for Direct Line
+	googleLocation: '',
+	city: '',
+	zoneNumber: '',
+	streetNumber: '',
+	buildingNumber: '',
 	companyLocation: '',
 	// Date & Time fields
 	bookingDate: '',
 	bookingTime: '',
+	bookingTimeTo: '',
 	availableSlots: [],
 	selectedDate: null,
 	slotsByDate: {}
@@ -701,13 +752,36 @@ const appState = {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+	console.log('Video production page loaded, initializing...');
 	loadCompanyLocation();
 	loadTimeSlots();
 	updateProgressBar();
+	// Initialize reference fields after a short delay to ensure DOM is ready
+	setTimeout(function() {
+		setupReferenceField('references-container', 'references');
+		setupReferenceField('current_client_references-container', 'current_client_references');
+	}, 100);
+	console.log('Video production initialization complete');
 });
 
 // Navigation
 function goToStep(step) {
+	// Save reference fields before navigation
+	const referencesContainer = document.getElementById('references-container');
+	const currentClientReferencesContainer = document.getElementById('current_client_references-container');
+	
+	if (referencesContainer && !referencesContainer.classList.contains('placeholder')) {
+		const text = referencesContainer.innerText.trim();
+		const hiddenInput = document.getElementById('references');
+		if (hiddenInput) hiddenInput.value = text;
+	}
+	
+	if (currentClientReferencesContainer && !currentClientReferencesContainer.classList.contains('placeholder')) {
+		const text = currentClientReferencesContainer.innerText.trim();
+		const hiddenInput = document.getElementById('current_client_references');
+		if (hiddenInput) hiddenInput.value = text;
+	}
+	
 	// Validate current step before moving forward
 	if (step > appState.currentStep && !validateCurrentStep()) {
 		return;
@@ -756,16 +830,47 @@ function validateCurrentStep() {
 		const name = document.getElementById('customer_name').value.trim();
 		const phone = document.getElementById('phone_number').value.trim();
 		const email = document.getElementById('email').value.trim();
+		let isValid = true;
 		
-		if (!name || !phone || !email) {
-			alert('{{ _("Please fill in all required fields") }}');
-			return false;
+		// Clear previous errors
+		document.getElementById('customer_name_error').style.display = 'none';
+		document.getElementById('phone_number_error').style.display = 'none';
+		document.getElementById('email_error').style.display = 'none';
+		
+		// Validate Name - letters only
+		if (!name) {
+			document.getElementById('customer_name_error').textContent = '{{ _("Name is required") }}';
+			document.getElementById('customer_name_error').style.display = 'block';
+			isValid = false;
+		} else if (!/^[A-Za-z\s]+$/.test(name)) {
+			document.getElementById('customer_name_error').textContent = '{{ _("Name should contain only letters") }}';
+			document.getElementById('customer_name_error').style.display = 'block';
+			isValid = false;
 		}
 		
-		if (!email.includes('@')) {
-			alert('{{ _("Please enter a valid email address") }}');
-			return false;
+		// Validate Number - numbers only
+		if (!phone) {
+			document.getElementById('phone_number_error').textContent = '{{ _("Number is required") }}';
+			document.getElementById('phone_number_error').style.display = 'block';
+			isValid = false;
+		} else if (!/^\d+$/.test(phone)) {
+			document.getElementById('phone_number_error').textContent = '{{ _("Number should contain only digits") }}';
+			document.getElementById('phone_number_error').style.display = 'block';
+			isValid = false;
 		}
+		
+		// Validate Email - email format
+		if (!email) {
+			document.getElementById('email_error').textContent = '{{ _("Email is required") }}';
+			document.getElementById('email_error').style.display = 'block';
+			isValid = false;
+		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			document.getElementById('email_error').textContent = '{{ _("Please enter a valid email address") }}';
+			document.getElementById('email_error').style.display = 'block';
+			isValid = false;
+		}
+		
+		return isValid;
 	}
 	
 	if (step === 2) {
@@ -776,11 +881,18 @@ function validateCurrentStep() {
 		
 		if (appState.appointmentType === 'New Customer') {
 			const industry = document.getElementById('industry').value;
+			const serviceGroup = document.getElementById('service-group');
+			const service = serviceGroup.style.display !== 'none' ? document.getElementById('service').value : '';
 			const requirements = document.getElementById('requirements').value;
 			const budget = document.getElementById('budget').value;
 			
 			if (!industry || !requirements || !budget) {
 				alert('{{ _("Please fill in all required fields for New Customer") }}');
+				return false;
+			}
+			
+			if (serviceGroup.style.display !== 'none' && !service) {
+				alert('{{ _("Please select a service") }}');
 				return false;
 			}
 		} else {
@@ -795,21 +907,15 @@ function validateCurrentStep() {
 	}
 	
 	if (step === 3) {
-		if (!appState.meetingLocation) {
-			alert('{{ _("Please select a meeting location") }}');
-			return false;
-		}
+		const googleLoc = document.getElementById('google_location').value.trim();
+		const city = document.getElementById('city').value;
+		const zone = document.getElementById('zone_number').value.trim();
+		const street = document.getElementById('street_number').value.trim();
+		const building = document.getElementById('building_number').value.trim();
 		
-		if (appState.meetingLocation === 'Customer Location') {
-			const loc = document.getElementById('location').value.trim();
-			const street = document.getElementById('street_name').value.trim();
-			const building = document.getElementById('building_name').value.trim();
-			const apt = document.getElementById('apartment_number').value.trim();
-			
-			if (!loc || !street || !building || !apt) {
-				alert('{{ _("Please fill in all location details") }}');
-				return false;
-			}
+		if (!googleLoc || !city || !zone || !street || !building) {
+			alert('{{ _("Please fill in all location details") }}');
+			return false;
 		}
 	}
 	
@@ -833,9 +939,11 @@ function saveStepData(step) {
 	if (step === 2) {
 		if (appState.appointmentType === 'New Customer') {
 			appState.industry = document.getElementById('industry').value;
+			const serviceGroup = document.getElementById('service-group');
+			appState.service = serviceGroup.style.display !== 'none' ? document.getElementById('service').value : '';
 			appState.requirements = document.getElementById('requirements').value;
 			appState.budget = document.getElementById('budget').value;
-			appState.notes = document.getElementById('notes').value;
+			appState.notes = document.getElementById('notes') ? document.getElementById('notes').value : '';
 			appState.references = document.getElementById('references').value;
 		} else {
 			appState.brandName = document.getElementById('brand_name').value;
@@ -845,12 +953,11 @@ function saveStepData(step) {
 	}
 	
 	if (step === 3) {
-		if (appState.meetingLocation === 'Customer Location') {
-			appState.location = document.getElementById('location').value;
-			appState.streetName = document.getElementById('street_name').value;
-			appState.buildingName = document.getElementById('building_name').value;
-			appState.apartmentNumber = document.getElementById('apartment_number').value;
-		}
+		appState.googleLocation = document.getElementById('google_location').value;
+		appState.city = document.getElementById('city').value;
+		appState.zoneNumber = document.getElementById('zone_number').value;
+		appState.streetNumber = document.getElementById('street_number').value;
+		appState.buildingNumber = document.getElementById('building_number').value;
 	}
 }
 
@@ -870,27 +977,9 @@ function loadCompanyLocation() {
 	});
 }
 
-// Location Selection
+// Location Selection (Not used for Direct Line, always Customer Location)
 function selectLocation(locationType) {
-	appState.meetingLocation = locationType;
-	
-	// Update visual selection
-	document.querySelectorAll('.location-option').forEach(opt => {
-		opt.classList.remove('selected');
-	});
-	event.currentTarget.classList.add('selected');
-	
-	// Show/hide location details
-	const companyDisplay = document.getElementById('company-location-display');
-	const customerForm = document.getElementById('customer-location-form');
-	
-	if (locationType === 'Our Location') {
-		if (companyDisplay) companyDisplay.classList.add('show');
-		if (customerForm) customerForm.classList.remove('show');
-	} else {
-		if (companyDisplay) companyDisplay.classList.remove('show');
-		if (customerForm) customerForm.classList.add('show');
-	}
+	// This function is kept for compatibility but not used for Direct Line
 }
 
 // Load Time Slots
@@ -898,10 +987,25 @@ function loadTimeSlots() {
 	frappe.call({
 		method: 'appointment_addons.www.book-appointment.get_time_slots',
 		callback: function(r) {
+			console.log('Time slots response:', r);
 			if (r.message) {
+				console.log('Time slots received:', r.message);
 				appState.availableSlots = r.message;
 				groupSlotsByDate();
 				renderAvailableDates();
+			} else {
+				console.error('No time slots received');
+				const container = document.getElementById('available-dates-container');
+				if (container) {
+					container.innerHTML = '<div class="alert alert-danger">No available dates. Please check Appointment Booking Settings.</div>';
+				}
+			}
+		},
+		error: function(r) {
+			console.error('Error loading time slots:', r);
+			const container = document.getElementById('available-dates-container');
+			if (container) {
+				container.innerHTML = '<div class="alert alert-danger">Error loading time slots. Please try again.</div>';
 			}
 		}
 	});
@@ -909,6 +1013,13 @@ function loadTimeSlots() {
 
 function groupSlotsByDate() {
 	appState.slotsByDate = {};
+	
+	console.log('Grouping slots:', appState.availableSlots);
+	
+	if (!appState.availableSlots || appState.availableSlots.length === 0) {
+		console.warn('No available slots to group');
+		return;
+	}
 	
 	appState.availableSlots.forEach(slot => {
 		if (!appState.slotsByDate[slot.date]) {
@@ -921,6 +1032,8 @@ function groupSlotsByDate() {
 		}
 		appState.slotsByDate[slot.date].slots.push(slot);
 	});
+	
+	console.log('Grouped slots by date:', appState.slotsByDate);
 }
 
 function renderAvailableDates() {
@@ -929,8 +1042,11 @@ function renderAvailableDates() {
 	
 	const dates = Object.values(appState.slotsByDate);
 	
+	console.log('Rendering dates:', dates);
+	
 	if (dates.length === 0) {
-		container.innerHTML = '<div class="alert alert-danger">{{ _("No available dates at the moment. Please try again later or contact us directly.") }}</div>';
+		console.warn('No dates to render');
+		container.innerHTML = '<div class="alert alert-danger">{{ _("No available dates at the moment. Please check Appointment Booking Settings and ensure availability slots are configured.") }}</div>';
 		return;
 	}
 	
@@ -987,20 +1103,24 @@ function renderTimeSlotsForDate(date) {
 	dateInfo.slots.forEach(slot => {
 		const timeEl = document.createElement('div');
 		timeEl.className = 'time-slot';
+		const slotKey = slot.from_time + '-' + (slot.to_time || '');
 		if (appState.bookingTime === slot.from_time) {
 			timeEl.classList.add('selected');
 		}
 		
-		timeEl.onclick = () => selectTimeSlot(slot.from_time);
+		timeEl.onclick = () => selectTimeSlot(slot.from_time, slot.to_time);
 		
-		timeEl.innerHTML = `${slot.from_time}`;
+		// Display time range if to_time is available, otherwise just from_time
+		const timeDisplay = slot.to_time ? `${slot.from_time} : ${slot.to_time}` : `${slot.from_time}`;
+		timeEl.innerHTML = timeDisplay;
 		
 		grid.appendChild(timeEl);
 	});
 }
 
-function selectTimeSlot(time) {
+function selectTimeSlot(time, toTime) {
 	appState.bookingTime = time;
+	appState.bookingTimeTo = toTime || '';
 	renderTimeSlotsForDate(appState.selectedDate);
 }
 
@@ -1020,10 +1140,131 @@ function selectAppointmentType(type) {
 	if (type === 'New Customer') {
 		newCustomerForm.style.display = 'block';
 		currentClientForm.style.display = 'none';
+		// Initialize reference field
+		setupReferenceField('references-container', 'references');
 	} else {
 		newCustomerForm.style.display = 'none';
 		currentClientForm.style.display = 'block';
+		// Initialize reference field
+		setupReferenceField('current_client_references-container', 'current_client_references');
 	}
+}
+
+// Industry to Service mapping
+const industryServices = {
+	'Food & Hospitality': ['Restaurants', 'Cafés', 'Bakeries', 'Catering'],
+	'Healthcare': ['Clinics', 'Dental Clinics', 'Dermatology', 'Hospitals', 'Pharmacies', 'Wellness Centers', 'Nutrition & Diet Services'],
+	'Beauty & Fashion': ['Beauty Salons', 'Spas', 'Nail Bars', 'Barbershops', 'Cosmetics Brands', 'Fashion Boutiques'],
+	'Real Estate': ['Real Estate Agencies', 'Developers', 'Property Management', 'Interior Design', 'Furniture Stores'],
+	'Automotive': ['Car Dealers', 'Car Rentals', 'Workshops', 'Car Detailing', 'Spare Parts'],
+	'Education': ['Schools', 'Nurseries', 'Training Centers', 'Universities', 'Online Courses'],
+	'Sports & Fitness': ['Gyms', 'Personal Trainers', 'Sports Clubs', 'Yoga/Pilates Studios', 'Sports Academies'],
+	'Technology & Digital Services': ['IT Companies', 'Software', 'Apps', 'Web Agencies', 'Cybersecurity', 'Hosting Services'],
+	'Commerce & Retail': ['E-commerce', 'Retail Stores', 'Supermarkets', 'Jewelry', 'Perfume Stores', 'Home Appliances'],
+	'Professional Services': ['Law Firms', 'Accounting', 'Consulting', 'HR Agencies', 'Recruitment'],
+	'Travel & Tourism': ['Travel Agencies', 'Tour Guides', 'Airlines', 'Transport Services'],
+	'Construction & Contracting': ['Contractors', 'Engineering Offices', 'Maintenance', 'MEP', 'Landscaping'],
+	'Events & Entertainment': ['Event Management', 'Photographers', 'Florists', 'Entertainment Companies', 'Musicians'],
+	'Finance': ['Banks', 'Insurance', 'FinTech', 'Investment Firms'],
+	'Others': []
+};
+
+function onIndustryChange() {
+	const industry = document.getElementById('industry').value;
+	const serviceGroup = document.getElementById('service-group');
+	const serviceSelect = document.getElementById('service');
+	
+	if (industry && industry !== 'Others' && industryServices[industry]) {
+		serviceGroup.style.display = 'block';
+		serviceSelect.innerHTML = '<option value="">{{ _("Select Service") }}</option>';
+		
+		industryServices[industry].forEach(service => {
+			const option = document.createElement('option');
+			option.value = service;
+			option.textContent = service;
+			serviceSelect.appendChild(option);
+		});
+		serviceSelect.required = true;
+	} else {
+		serviceGroup.style.display = 'none';
+		serviceSelect.value = '';
+		serviceSelect.required = false;
+	}
+}
+
+// Setup reference field with link detection
+function setupReferenceField(containerId, hiddenInputId) {
+	const container = document.getElementById(containerId);
+	const hiddenInput = document.getElementById(hiddenInputId);
+	
+	if (!container) return;
+	
+	// Initialize with placeholder
+	if (!container.textContent.trim()) {
+		container.textContent = 'For videos and photos';
+		container.style.color = '#999';
+		container.classList.add('placeholder');
+	}
+	
+	container.addEventListener('focus', function() {
+		if (this.classList.contains('placeholder')) {
+			this.textContent = '';
+			this.style.color = '#333';
+			this.classList.remove('placeholder');
+		}
+	});
+	
+	container.addEventListener('blur', function() {
+		let text = this.innerText.trim();
+		if (text === '') {
+			this.textContent = 'For videos and photos';
+			this.style.color = '#999';
+			this.classList.add('placeholder');
+			if (hiddenInput) hiddenInput.value = '';
+		} else {
+			// Update hidden input with plain text
+			if (hiddenInput) hiddenInput.value = text;
+			// Render links
+			renderReferenceLinks(this, text);
+		}
+	});
+	
+	container.addEventListener('input', function() {
+		// While typing, store plain text in hidden input
+		let text = this.innerText.trim();
+		if (hiddenInput && !this.classList.contains('placeholder')) {
+			hiddenInput.value = text;
+		}
+	});
+}
+
+function renderReferenceLinks(container, text) {
+	// Detect URLs and convert to links
+	const urlRegex = /(https?:\/\/[^\s]+)/g;
+	
+	// Check if text contains URLs
+	if (!urlRegex.test(text)) {
+		// No URLs, just set as plain text with line breaks
+		container.innerHTML = text.replace(/\n/g, '<br>');
+		return;
+	}
+	
+	// Split by URLs and build HTML
+	const parts = text.split(urlRegex);
+	let htmlContent = '';
+	
+	parts.forEach(part => {
+		if (urlRegex.test(part)) {
+			// It's a URL, make it a link
+			htmlContent += `<a href="${part}" target="_blank" style="color: #007bff; text-decoration: underline;">${part}</a>`;
+		} else {
+			// Regular text, preserve line breaks
+			htmlContent += part.replace(/\n/g, '<br>');
+		}
+	});
+	
+	container.innerHTML = htmlContent;
+	container.style.color = '#333';
 }
 
 // Submit Appointment
@@ -1051,6 +1292,7 @@ function submitAppointment() {
 		email: appState.email,
 		appointment_type: appState.appointmentType,
 		industry: appState.industry,
+		service: appState.service,
 		requirements: appState.requirements,
 		budget: appState.budget,
 		notes: appState.notes,
@@ -1060,10 +1302,11 @@ function submitAppointment() {
 		current_client_references: appState.currentClientReferences,
 		// Location data
 		meeting_location: appState.meetingLocation,
-		location: appState.location,
-		street_name: appState.streetName,
-		building_name: appState.buildingName,
-		apartment_number: appState.apartmentNumber,
+		google_location: appState.googleLocation,
+		city: appState.city,
+		zone_number: appState.zoneNumber,
+		street_number: appState.streetNumber,
+		building_number: appState.buildingNumber,
 		// Date & Time data
 		booking_date: appState.bookingDate,
 		booking_time: appState.bookingTime
@@ -1076,14 +1319,8 @@ function submitAppointment() {
 		},
 		callback: function(r) {
 			if (r.message && r.message.success) {
-				alertDiv.className = 'alert alert-success';
-				alertDiv.textContent = r.message.message;
-				alertDiv.style.display = 'block';
-				
-				// Reset form and redirect after 3 seconds
-				setTimeout(function() {
-					window.location.href = '/video-production-appointment';
-				}, 3000);
+				// Show success page
+				goToStep(5);
 			} else {
 				alertDiv.className = 'alert alert-danger';
 				alertDiv.textContent = r.message ? r.message.message : '{{ _("An error occurred. Please try again.") }}';

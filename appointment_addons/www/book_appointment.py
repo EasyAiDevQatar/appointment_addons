@@ -11,6 +11,69 @@ no_cache = 1
 
 
 @frappe.whitelist(allow_guest=True)
+def debug_appointment_settings():
+	"""Debug function to check Appointment Booking Settings"""
+	try:
+		settings_doc = frappe.get_single("Appointment Booking Settings")
+		
+		debug_info = {
+			"settings_exists": bool(settings_doc),
+			"enable_scheduling": getattr(settings_doc, 'enable_scheduling', None),
+			"appointment_duration": getattr(settings_doc, 'appointment_duration', None),
+			"advance_booking_days": getattr(settings_doc, 'advance_booking_days', None),
+			"has_availability_of_slots": hasattr(settings_doc, 'availability_of_slots'),
+			"availability_slots_count": len(settings_doc.availability_of_slots) if hasattr(settings_doc, 'availability_of_slots') else 0,
+			"availability_slots": []
+		}
+		
+		if hasattr(settings_doc, 'availability_of_slots') and settings_doc.availability_of_slots:
+			for idx, slot in enumerate(settings_doc.availability_of_slots):
+				debug_info["availability_slots"].append({
+					"index": idx,
+					"day_of_week": getattr(slot, 'day_of_week', None),
+					"from_time": str(getattr(slot, 'from_time', None)),
+					"to_time": str(getattr(slot, 'to_time', None)),
+					"from_time_type": type(getattr(slot, 'from_time', None)).__name__,
+					"to_time_type": type(getattr(slot, 'to_time', None)).__name__
+				})
+		
+		return debug_info
+	except Exception as e:
+		import traceback
+		return {
+			"error": str(e),
+			"traceback": traceback.format_exc()
+		}
+
+
+@frappe.whitelist(allow_guest=True)
+def test_settings():
+	"""Test function to verify settings are accessible"""
+	try:
+		settings_doc = frappe.get_doc("Appointment Booking Settings", "Appointment Booking Settings")
+		
+		slots = frappe.get_all(
+			"Appointment Booking Slots",
+			filters={"parent": "Appointment Booking Settings"},
+			fields=["day_of_week", "from_time", "to_time"]
+		)
+		
+		return {
+			"success": True,
+			"enable_scheduling": settings_doc.enable_scheduling,
+			"appointment_duration": settings_doc.appointment_duration,
+			"advance_booking_days": settings_doc.advance_booking_days,
+			"slots_count": len(slots),
+			"slots": slots
+		}
+	except Exception as e:
+		return {
+			"success": False,
+			"error": str(e)
+		}
+
+
+@frappe.whitelist(allow_guest=True)
 def get_services():
 	"""Get all active services"""
 	try:
@@ -39,61 +102,225 @@ def get_company_location():
 
 @frappe.whitelist(allow_guest=True)
 def get_time_slots():
-	"""Get available time slots for the next 30 days"""
+	"""Get available time slots from Appointment Booking Settings"""
 	try:
-		from datetime import timedelta
+		from datetime import timedelta, datetime, time as time_module
 		
+		print("=== get_time_slots called ===")
+		
+		# Get Appointment Booking Settings - use get_doc for better child table access
+		try:
+			settings_doc = frappe.get_doc("Appointment Booking Settings", "Appointment Booking Settings")
+			print(f"Settings doc loaded: {settings_doc.name}")
+		except:
+			try:
+				settings_doc = frappe.get_single("Appointment Booking Settings")
+				print(f"Settings doc loaded via get_single: {settings_doc.name}")
+			except Exception as e:
+				error_msg = f"Error getting Appointment Booking Settings: {str(e)}"
+				print(error_msg)
+				frappe.log_error(message=error_msg, title="Time Slots Error")
+				return []
+		
+		if not settings_doc:
+			frappe.log_error(message="Appointment Booking Settings not found", title="Time Slots Error")
+			return []
+		
+		# Check if scheduling is enabled
+		enable_scheduling = int(getattr(settings_doc, 'enable_scheduling', 0))
+		print(f"Enable scheduling: {enable_scheduling}")
+		if not enable_scheduling:
+			error_msg = "Scheduling is not enabled in Appointment Booking Settings"
+			print(error_msg)
+			frappe.log_error(message=error_msg, title="Time Slots Error")
+			return []
+		
+		# Get settings values
+		appointment_duration = int(getattr(settings_doc, 'appointment_duration', 60) or 60)
+		advance_booking_days = int(getattr(settings_doc, 'advance_booking_days', 7) or 7)
+		print(f"Duration: {appointment_duration}, Advance days: {advance_booking_days}")
+		
+		# Get availability slots - fetch directly from database for reliability
+		availability_slots = frappe.get_all(
+			"Appointment Booking Slots",
+			filters={"parent": "Appointment Booking Settings", "parenttype": "Appointment Booking Settings"},
+			fields=["day_of_week", "from_time", "to_time"],
+			order_by="idx"
+		)
+		print(f"Found {len(availability_slots)} availability slots: {availability_slots}")
+		
+		if not availability_slots:
+			frappe.log_error(message="No availability slots found in Appointment Booking Settings", title="Time Slots Error")
+			return []
+		
+		# Group availability by day
+		availability_by_day = {}
+		for slot in availability_slots:
+			day = slot.get('day_of_week', '').strip()
+			if not day:
+				continue
+			
+			# Normalize day name (capitalize first letter only)
+			day_normalized = day[0].upper() + day[1:].lower() if len(day) > 0 else ""
+			
+			if day_normalized not in availability_by_day:
+				availability_by_day[day_normalized] = []
+			
+			availability_by_day[day_normalized].append({
+				"from_time": slot.get('from_time'),
+				"to_time": slot.get('to_time')
+			})
+		
+		if not availability_by_day:
+			error_msg = "No valid availability slots configured"
+			print(error_msg)
+			frappe.log_error(message=error_msg, title="Time Slots Error")
+			return []
+		
+		print(f"Availability by day: {availability_by_day}")
+		
+		# Generate time slots
 		slots = []
 		today = getdate()
+		now = datetime.now()
+		print(f"Generating slots from {today} for {advance_booking_days} days")
+		print(f"Current datetime: {now}")
 		
-		# Generate slots for next 30 days
-		for i in range(30):
+		for i in range(advance_booking_days):
 			date = today + timedelta(days=i)
-			day_name = date.strftime("%A")
+			day_name = date.strftime("%A")  # e.g., "Sunday", "Monday"
 			
-			# Get available users for this day
-			availabilities = frappe.get_all(
-				"User Availability",
-				filters={
-					"day_of_week": day_name,
-					"is_available": 1
-				},
-				fields=["name", "user"]
-			)
+			print(f"Checking date {date} ({day_name})")
 			
-			if availabilities:
-				# Get time slots for the first available user (can be enhanced)
-				availability = frappe.get_doc("User Availability", availabilities[0].name)
+			# Check if we have availability for this day
+			if day_name not in availability_by_day:
+				print(f"  No availability configured for {day_name}")
+				continue
+			
+			print(f"  Found availability for {day_name}: {availability_by_day[day_name]}")
+			
+			# Process each time range for this day
+			for time_range in availability_by_day[day_name]:
+				from_time_val = time_range.get("from_time")
+				to_time_val = time_range.get("to_time")
 				
-				if availability.time_slots:
-					for slot in availability.time_slots:
-						# Check if slot is not already booked
-						existing_bookings = frappe.get_all(
-							"Appointment Booking",
-							filters={
-								"booking_date": date,
-								"booking_time": slot.from_time,
-								"status": ["in", ["Pending", "Confirmed"]]
-							}
-						)
-						
-						if not existing_bookings:
-							# Convert time to string format
-							from_time_str = str(slot.from_time)
-							to_time_str = str(slot.to_time)
-							
-							slots.append({
-								"date": str(date),
-								"date_display": date.strftime("%B %d, %Y"),
-								"day": day_name,
-								"from_time": from_time_str,
-								"to_time": to_time_str,
-								"time_display": f"{from_time_str} - {to_time_str}"
-							})
+				if not from_time_val or not to_time_val:
+					continue
+				
+				# Parse time values
+				def parse_time(time_val):
+					if isinstance(time_val, time_module):
+						return time_val
+					elif isinstance(time_val, str):
+						parts = time_val.split(':')
+						if len(parts) >= 2:
+							hour = int(parts[0])
+							minute = int(parts[1])
+							second = int(parts[2]) if len(parts) > 2 else 0
+							return time_module(hour, minute, second)
+					elif isinstance(time_val, timedelta):
+						# Convert timedelta to time
+						total_seconds = int(time_val.total_seconds())
+						hours = total_seconds // 3600
+						minutes = (total_seconds % 3600) // 60
+						seconds = total_seconds % 60
+						return time_module(hours, minutes, seconds)
+					elif hasattr(time_val, 'hour'):
+						return time_module(time_val.hour, time_val.minute, getattr(time_val, 'second', 0))
+					return None
+				
+				from_time = parse_time(from_time_val)
+				to_time = parse_time(to_time_val)
+				
+				if not from_time or not to_time:
+					print(f"  Failed to parse times: {from_time_val} -> {from_time}, {to_time_val} -> {to_time}")
+					continue
+				
+				print(f"  Generating slots from {from_time} to {to_time}")
+				
+				# Generate slots for this time range
+				current_time = datetime.combine(date, from_time)
+				end_datetime = datetime.combine(date, to_time)
+				
+				# Initialize slot counter for this time range
+				slot_count = 0
+				print(f"  Initialized slot_count, starting loop from {current_time} to {end_datetime}")
+				
+				while current_time + timedelta(minutes=appointment_duration) <= end_datetime:
+					slot_datetime = current_time
+					
+					# Skip past times (allow 5 minute buffer)
+					if slot_datetime < (now - timedelta(minutes=5)):
+						if slot_count == 0:  # Only log first skip
+							print(f"    Skipping past times (first skip: {slot_datetime} < {now})")
+						current_time += timedelta(minutes=appointment_duration)
+						continue
+					
+					slot_from_time = current_time.time()
+					slot_to_time = (current_time + timedelta(minutes=appointment_duration)).time()
+					
+					# Format for display and storage
+					from_time_str = slot_from_time.strftime("%H:%M")
+					to_time_str = slot_to_time.strftime("%H:%M")
+					from_time_full = slot_from_time.strftime("%H:%M:%S")
+					
+					# Check if slot is already booked
+					booked = False
+					
+					# Check Appointment Booking
+					existing = frappe.db.count("Appointment Booking", {
+						"booking_date": date,
+						"booking_time": from_time_full,
+						"status": ["in", ["Pending", "Confirmed"]]
+					})
+					if existing > 0:
+						print(f"    Slot {from_time_str} already booked in Appointment Booking")
+						booked = True
+					
+					# Check Video Production Appointment
+					if not booked:
+						existing_video = frappe.db.count("Video Production Appointment", {
+							"booking_date": date,
+							"booking_time": from_time_full,
+							"status": ["in", ["Pending", "Confirmed"]]
+						})
+						if existing_video > 0:
+							print(f"    Slot {from_time_str} already booked in Video Production")
+							booked = True
+					
+					# Add slot if not booked
+					if not booked:
+						slots.append({
+							"date": str(date),
+							"date_display": date.strftime("%B %d, %Y"),
+							"day": day_name,
+							"from_time": from_time_str,
+							"to_time": to_time_str,
+							"time_display": f"{from_time_str} - {to_time_str}"
+						})
+						slot_count += 1
+						if slot_count <= 3:  # Only log first 3
+							print(f"    Added slot: {from_time_str} - {to_time_str}")
+					
+					current_time += timedelta(minutes=appointment_duration)
+				
+				print(f"  Generated {slot_count} slots for this time range")
+		
+		print(f"Total slots generated: {len(slots)}")
+		print(f"Sample slots: {slots[:3] if len(slots) > 0 else 'None'}")
+		
+		if len(slots) == 0:
+			print("WARNING: Returning empty slots list!")
+			print(f"  Today: {today}, Now: {now}")
+			print(f"  Availability days configured: {list(availability_by_day.keys())}")
 		
 		return slots
+		
 	except Exception as e:
-		frappe.log_error(message=str(e), title="Error fetching time slots")
+		import traceback
+		error_msg = f"{str(e)}\n\n{traceback.format_exc()}"
+		frappe.log_error(message=error_msg, title="Error fetching time slots")
+		print(f"ERROR in get_time_slots: {error_msg}")
 		return []
 
 

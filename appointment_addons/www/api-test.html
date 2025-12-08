@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>API Test - Time Slots</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 20px;
+		}
+		.info {
+			background: #e7f3ff;
+			padding: 15px;
+			border-radius: 5px;
+			margin-bottom: 20px;
+		}
+		.slot {
+			background: #f5f5f5;
+			padding: 10px;
+			margin: 5px 0;
+			border-radius: 3px;
+		}
+		.error {
+			background: #ffe7e7;
+			color: #d00;
+			padding: 15px;
+			border-radius: 5px;
+		}
+	</style>
+</head>
+<body>
+	<h1>Time Slots API Test</h1>
+	
+	{% if error %}
+		<div class="error">
+			<strong>Error:</strong> {{ error }}<br>
+			<pre>{{ traceback }}</pre>
+		</div>
+	{% endif %}
+	
+	<div class="info">
+		<strong>Total Slots:</strong> {{ slots_count|default(0) }}
+	</div>
+	
+	{% if slots_count and slots_count > 0 %}
+		<h2>Available Slots:</h2>
+		{% for slot in slots %}
+			<div class="slot">
+				<strong>{{ slot.date_display }}</strong> ({{ slot.day }}) - 
+				{{ slot.from_time }} : {{ slot.to_time }}
+			</div>
+		{% endfor %}
+	{% else %}
+		<div class="error">
+			<strong>No slots found!</strong><br>
+			Please check:
+			<ul>
+				<li>Appointment Booking Settings is configured</li>
+				<li>enable_scheduling is checked</li>
+				<li>availability_of_slots has entries for Sunday/Monday</li>
+				<li>Check server logs for errors</li>
+			</ul>
+		</div>
+	{% endif %}
+	
+	<hr>
+	<p><a href="/book-appointment">Go to Booking Form</a></p>
+	<p><a href="/test-slots">Go to Test Slots Page</a></p>
+</body>
+</html>
+

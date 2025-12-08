@@ -448,6 +448,10 @@
 			<div class="progress-step-circle">5</div>
 			<div class="progress-step-label">{{ _("Date & Time") }}</div>
 		</div>
+		<div class="progress-step" data-step="5">
+			<div class="progress-step-circle">✓</div>
+			<div class="progress-step-label">{{ _("Success") }}</div>
+		</div>
 	</div>
 	
 	<!-- Step 0: Company Selection -->
@@ -458,12 +462,14 @@
 			<div class="appointment-type-options">
 				<div class="appointment-type-option" onclick="selectCompany('Easy AI')">
 					<h4>{{ _("Easy AI") }}</h4>
-					<p>{{ _("Book appointment with Easy AI") }}</p>
+					<p>{{ _("Book an appointment with us") }}</p>
+					<p style="margin-top: 10px; font-size: 14px; color: #666;">{{ _("Services: Photography - Videography - Production - Event Management") }}</p>
 				</div>
 				
 				<div class="appointment-type-option" onclick="selectCompany('Directlines')">
-					<h4>{{ _("Directlines") }}</h4>
-					<p>{{ _("Video Production Appointment") }}</p>
+					<h4>{{ _("Direct Line") }}</h4>
+					<p>{{ _("Book an appointment with us") }}</p>
+					<p style="margin-top: 10px; font-size: 14px; color: #666;">{{ _("Services: ERP-Loyalty - Website-APP - Host and Server Management") }}</p>
 				</div>
 			</div>
 		</div>
@@ -539,7 +545,7 @@
 			<div id="company-location-display" class="location-details">
 				<div class="form-group">
 					<label>{{ _("Our Location") }}</label>
-					<div style="padding: 15px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e0e0e0;" id="company-location-text">
+					<div style="padding: 15px; background: #f8f9fa; border-radius: 4px; border: 1px solid #e0e0e0; line-height: 1.8;" id="company-location-text">
 						{{ _("Loading...") }}
 					</div>
 				</div>
@@ -626,6 +632,7 @@ const appState = {
 	apartmentNumber: '',
 	bookingDate: '',
 	bookingTime: '',
+	bookingTimeTo: '',
 	services: [],
 	companyLocation: '',
 	availableSlots: [],
@@ -635,10 +642,12 @@ const appState = {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+	console.log('Page loaded, initializing...');
 	loadServices();
 	loadCompanyLocation();
 	loadTimeSlots();
 	updateProgressBar();
+	console.log('Initialization complete');
 });
 
 // Navigation
@@ -695,6 +704,11 @@ function selectCompany(company) {
 	});
 	event.currentTarget.classList.add('selected');
 	
+	// Load company location when company is selected
+	if (company === 'Easy AI') {
+		loadCompanyLocation();
+	}
+	
 	// Enable next button
 	document.getElementById('company-next-btn').disabled = false;
 }
@@ -705,8 +719,8 @@ function proceedAfterCompanySelection() {
 		return;
 	}
 	
-	// If Directlines, redirect to video-production-appointment page
-	if (appState.company === 'Directlines') {
+	// If Direct Line, redirect to video-production-appointment page
+	if (appState.company === 'Direct Line' || appState.company === 'Directlines') {
 		window.location.href = '/video-production-appointment';
 		return;
 	}
@@ -857,9 +871,21 @@ function loadCompanyLocation() {
 	frappe.call({
 		method: 'appointment_addons.www.book-appointment.get_company_location',
 		callback: function(r) {
-			if (r.message) {
-				appState.companyLocation = r.message;
-				document.getElementById('company-location-text').textContent = r.message || '{{ _("Location not set. Please contact administrator.") }}';
+			const locationText = document.getElementById('company-location-text');
+			if (locationText) {
+				if (appState.company === 'Easy AI') {
+					// Show Easy AI specific location
+					appState.companyLocation = 'Qatar - Doha - C Ring - Bin Mahmoud area\nAl mana tower B\nMezzanine floor\nOffice no 12\n\nhttps://www.google.com/maps?q=25.2773603,51.5086372&z=17&hl=en';
+					locationText.innerHTML = `Qatar - Doha - C Ring - Bin Mahmoud area<br>
+						Direct line<br>
+						Al mana tower B<br>
+						Mezzanine floor<br>
+						Office no 12<br><br>
+						<a href="https://www.google.com/maps?q=25.2773603,51.5086372&z=17&hl=en" target="_blank" style="color: #007bff;">https://www.google.com/maps?q=25.2773603,51.5086372&z=17&hl=en</a>`;
+				} else if (r.message) {
+					appState.companyLocation = r.message;
+					locationText.textContent = r.message || '{{ _("Location not set. Please contact administrator.") }}';
+				}
 			}
 		}
 	});
@@ -893,10 +919,25 @@ function loadTimeSlots() {
 	frappe.call({
 		method: 'appointment_addons.www.book-appointment.get_time_slots',
 		callback: function(r) {
+			console.log('Time slots response:', r);
 			if (r.message) {
+				console.log('Time slots received:', r.message);
 				appState.availableSlots = r.message;
 				groupSlotsByDate();
 				renderAvailableDates();
+			} else {
+				console.error('No time slots received');
+				const container = document.getElementById('available-dates-container');
+				if (container) {
+					container.innerHTML = '<div class="alert alert-danger">No available dates. Please check Appointment Booking Settings.</div>';
+				}
+			}
+		},
+		error: function(r) {
+			console.error('Error loading time slots:', r);
+			const container = document.getElementById('available-dates-container');
+			if (container) {
+				container.innerHTML = '<div class="alert alert-danger">Error loading time slots. Please try again.</div>';
 			}
 		}
 	});
@@ -904,6 +945,13 @@ function loadTimeSlots() {
 
 function groupSlotsByDate() {
 	appState.slotsByDate = {};
+	
+	console.log('Grouping slots:', appState.availableSlots);
+	
+	if (!appState.availableSlots || appState.availableSlots.length === 0) {
+		console.warn('No available slots to group');
+		return;
+	}
 	
 	appState.availableSlots.forEach(slot => {
 		if (!appState.slotsByDate[slot.date]) {
@@ -916,14 +964,19 @@ function groupSlotsByDate() {
 		}
 		appState.slotsByDate[slot.date].slots.push(slot);
 	});
+	
+	console.log('Grouped slots by date:', appState.slotsByDate);
 }
 
 function renderAvailableDates() {
 	const container = document.getElementById('available-dates-container');
 	const dates = Object.values(appState.slotsByDate);
 	
+	console.log('Rendering dates:', dates);
+	
 	if (dates.length === 0) {
-		container.innerHTML = '<div class="alert alert-danger">{{ _("No available dates at the moment. Please try again later or contact us directly.") }}</div>';
+		console.warn('No dates to render');
+		container.innerHTML = '<div class="alert alert-danger">{{ _("No available dates at the moment. Please check Appointment Booking Settings and ensure availability slots are configured.") }}</div>';
 		return;
 	}
 	
@@ -982,16 +1035,19 @@ function renderTimeSlotsForDate(date) {
 			timeEl.classList.add('selected');
 		}
 		
-		timeEl.onclick = () => selectTimeSlot(slot.from_time);
+		timeEl.onclick = () => selectTimeSlot(slot.from_time, slot.to_time);
 		
-		timeEl.innerHTML = `${slot.from_time}`;
+		// Display time range if to_time is available, otherwise just from_time
+		const timeDisplay = slot.to_time ? `${slot.from_time} : ${slot.to_time}` : `${slot.from_time}`;
+		timeEl.innerHTML = timeDisplay;
 		
 		grid.appendChild(timeEl);
 	});
 }
 
-function selectTimeSlot(time) {
+function selectTimeSlot(time, toTime) {
 	appState.bookingTime = time;
+	appState.bookingTimeTo = toTime || '';
 	renderTimeSlotsForDate(appState.selectedDate);
 }
 
@@ -1031,14 +1087,8 @@ function submitBooking() {
 		},
 		callback: function(r) {
 			if (r.message && r.message.success) {
-				alertDiv.className = 'alert alert-success';
-				alertDiv.textContent = r.message.message;
-				alertDiv.style.display = 'block';
-				
-				// Reset and redirect after 3 seconds
-				setTimeout(function() {
-					window.location.href = '/book-appointment';
-				}, 3000);
+				// Show success page
+				goToStep(5);
 			} else {
 				alertDiv.className = 'alert alert-danger';
 				alertDiv.textContent = r.message ? r.message.message : '{{ _("An error occurred. Please try again.") }}';
