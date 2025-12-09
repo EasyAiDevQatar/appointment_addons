@@ -145,7 +145,8 @@ def get_time_slots():
 			"Appointment Booking Slots",
 			filters={"parent": "Appointment Booking Settings", "parenttype": "Appointment Booking Settings"},
 			fields=["day_of_week", "from_time", "to_time"],
-			order_by="idx"
+			order_by="idx",
+			ignore_permissions=True
 		)
 		print(f"Found {len(availability_slots)} availability slots: {availability_slots}")
 		

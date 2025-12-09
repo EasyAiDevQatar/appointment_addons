@@ -1,308 +1,307 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2025-01-27 10:00:00",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "naming_series",
-  "company",
-  "information_section",
-  "customer_name",
-  "phone_number",
-  "email",
-  "column_break_1",
-  "appointment_type",
-  "new_customer_section",
-  "industry",
-  "requirements",
-  "budget",
-  "notes",
-  "references",
-  "current_client_section",
-  "brand_name",
-  "acknowledgment_checkbox",
-  "column_break_2",
-  "current_client_notes",
-  "current_client_references",
-  "location_section",
-  "meeting_location",
-  "company_location",
-  "customer_location_details",
-  "location",
-  "street_name",
-  "building_name",
-  "apartment_number",
-  "booking_section",
-  "booking_date",
-  "booking_time",
-  "status",
-  "amended_from"
- ],
- "fields": [
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Naming Series",
-   "options": "VPA-.YYYY.-",
-   "reqd": 1
-  },
-  {
-   "default": "Directlines",
-   "fieldname": "company",
-   "fieldtype": "Select",
-   "label": "Company",
-   "options": "Easy AI\nDirectlines",
-   "reqd": 1
-  },
-  {
-   "fieldname": "information_section",
-   "fieldtype": "Section Break",
-   "label": "Information - العنوان"
-  },
-  {
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Name",
-   "reqd": 1
-  },
-  {
-   "fieldname": "phone_number",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Number",
-   "reqd": 1
-  },
-  {
-   "fieldname": "email",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Email",
-   "options": "Email",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "New Customer",
-   "fieldname": "appointment_type",
-   "fieldtype": "Select",
-   "label": "Appointment Type",
-   "options": "New Customer\nCurrent Active Client",
-   "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'New Customer'",
-   "fieldname": "new_customer_section",
-   "fieldtype": "Section Break",
-   "label": "New Customer Details"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'New Customer'",
-   "fieldname": "industry",
-   "fieldtype": "Select",
-   "label": "Industry",
-   "options": "\nRestaurant\nCompany\nFactory\nClinic\nMedical Center",
-   "mandatory_depends_on": "eval:doc.appointment_type == 'New Customer'"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'New Customer'",
-   "fieldname": "requirements",
-   "fieldtype": "Select",
-   "label": "Requirements",
-   "options": "\nPhotos\nVideos\nBoth",
-   "mandatory_depends_on": "eval:doc.appointment_type == 'New Customer'"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'New Customer'",
-   "fieldname": "budget",
-   "fieldtype": "Select",
-   "label": "Budget",
-   "options": "\nLow\nMedium\nOpen",
-   "mandatory_depends_on": "eval:doc.appointment_type == 'New Customer'"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'New Customer'",
-   "fieldname": "notes",
-   "fieldtype": "Small Text",
-   "label": "Notes",
-   "default": "Please check our previous projects and determine your requirements and one of our sales team will contact you ASAP"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'New Customer'",
-   "fieldname": "references",
-   "fieldtype": "Small Text",
-   "label": "References",
-   "description": "Here you can share links from videos and photos that you like"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
-   "fieldname": "current_client_section",
-   "fieldtype": "Section Break",
-   "label": "Current Active Client Details"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
-   "fieldname": "brand_name",
-   "fieldtype": "Data",
-   "label": "Name of Your Brand",
-   "mandatory_depends_on": "eval:doc.appointment_type == 'Current Active Client'"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
-   "fieldname": "acknowledgment_checkbox",
-   "fieldtype": "Check",
-   "label": "I acknowledge the cancellation policy",
-   "mandatory_depends_on": "eval:doc.appointment_type == 'Current Active Client'"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
-   "fieldname": "current_client_notes",
-   "fieldtype": "Small Text",
-   "label": "Notes",
-   "default": "Please make sure you are an active client with us, if you are not a client with us the appointment will cancel automatically.\n\nNote 1: If you want to cancel you should cancel before 48 H at least or we will consider the shoot are done.\n\nNote 2: Storyboard and mood board will be discussed with operation manager before shooting."
-  },
-  {
-   "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
-   "fieldname": "current_client_references",
-   "fieldtype": "Small Text",
-   "label": "References",
-   "description": "Here you can share links from videos and photos that you like"
-  },
-  {
-   "fieldname": "location_section",
-   "fieldtype": "Section Break",
-   "label": "Meeting Location"
-  },
-  {
-   "fieldname": "meeting_location",
-   "fieldtype": "Select",
-   "label": "Meeting Location",
-   "options": "Our Location\nCustomer Location",
-   "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.meeting_location == 'Our Location'",
-   "fieldname": "company_location",
-   "fieldtype": "Small Text",
-   "label": "Company Location",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.meeting_location == 'Customer Location'",
-   "fieldname": "customer_location_details",
-   "fieldtype": "Section Break",
-   "label": "Customer Location Details"
-  },
-  {
-   "depends_on": "eval:doc.meeting_location == 'Customer Location'",
-   "fieldname": "location",
-   "fieldtype": "Data",
-   "label": "Location",
-   "mandatory_depends_on": "eval:doc.meeting_location == 'Customer Location'"
-  },
-  {
-   "depends_on": "eval:doc.meeting_location == 'Customer Location'",
-   "fieldname": "street_name",
-   "fieldtype": "Data",
-   "label": "Street Name",
-   "mandatory_depends_on": "eval:doc.meeting_location == 'Customer Location'"
-  },
-  {
-   "depends_on": "eval:doc.meeting_location == 'Customer Location'",
-   "fieldname": "building_name",
-   "fieldtype": "Data",
-   "label": "Building Name and Number",
-   "mandatory_depends_on": "eval:doc.meeting_location == 'Customer Location'"
-  },
-  {
-   "depends_on": "eval:doc.meeting_location == 'Customer Location'",
-   "fieldname": "apartment_number",
-   "fieldtype": "Data",
-   "label": "Apartment Number",
-   "mandatory_depends_on": "eval:doc.meeting_location == 'Customer Location'"
-  },
-  {
-   "fieldname": "booking_section",
-   "fieldtype": "Section Break",
-   "label": "Booking Date & Time"
-  },
-  {
-   "fieldname": "booking_date",
-   "fieldtype": "Date",
-   "label": "Booking Date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "booking_time",
-   "fieldtype": "Time",
-   "label": "Booking Time",
-   "reqd": 1
-  },
-  {
-   "default": "Pending",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Pending\nConfirmed\nCancelled\nCompleted"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Video Production Appointment",
-   "print_hide": 1,
-   "read_only": 1
-  }
- ],
- "index_web_pages_for_search": 1,
- "is_submittable": 0,
- "links": [],
- "modified": "2025-01-27 10:00:00",
- "modified_by": "Administrator",
- "module": "Appointment Addons",
- "name": "Video Production Appointment",
- "naming_rule": "By \"Naming Series\" field",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "write": 1
-  }
- ],
- "row_format": "Dynamic",
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": [],
- "track_changes": 1
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "naming_series:",
+    "creation": "2025-01-27 10:00:00",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "naming_series",
+        "company",
+        "information_section",
+        "customer_name",
+        "phone_number",
+        "email",
+        "column_break_1",
+        "appointment_type",
+        "new_customer_section",
+        "industry",
+        "requirements",
+        "budget",
+        "notes",
+        "references",
+        "current_client_section",
+        "brand_name",
+        "acknowledgment_checkbox",
+        "column_break_2",
+        "current_client_notes",
+        "current_client_references",
+        "location_section",
+        "meeting_location",
+        "company_location",
+        "customer_location_details",
+        "location",
+        "street_name",
+        "building_name",
+        "apartment_number",
+        "booking_section",
+        "booking_date",
+        "booking_time",
+        "status",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "label": "Naming Series",
+            "options": "VPA-.YYYY.-",
+            "reqd": 1
+        },
+        {
+            "default": "Directlines",
+            "fieldname": "company",
+            "fieldtype": "Select",
+            "label": "Company",
+            "options": "Easy AI\nDirectlines",
+            "reqd": 1
+        },
+        {
+            "fieldname": "information_section",
+            "fieldtype": "Section Break",
+            "label": "Information - العنوان"
+        },
+        {
+            "fieldname": "customer_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Name",
+            "reqd": 1
+        },
+        {
+            "fieldname": "phone_number",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Number",
+            "reqd": 1
+        },
+        {
+            "fieldname": "email",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Email",
+            "options": "Email",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "New Customer",
+            "fieldname": "appointment_type",
+            "fieldtype": "Select",
+            "label": "Appointment Type",
+            "options": "New Customer\nCurrent Active Client",
+            "reqd": 1
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'New Customer'",
+            "fieldname": "new_customer_section",
+            "fieldtype": "Section Break",
+            "label": "New Customer Details"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'New Customer'",
+            "fieldname": "industry",
+            "fieldtype": "Select",
+            "label": "Industry",
+            "options": "\nFood & Hospitality\nHealthcare\nBeauty & Fashion\nReal Estate\nAutomotive\nEducation\nSports & Fitness\nTechnology & Digital Services\nCommerce & Retail\nProfessional Services\nTravel & Tourism\nConstruction & Contracting\nEvents & Entertainment\nFinance\nOthers",
+            "mandatory_depends_on": "eval:doc.appointment_type == 'New Customer'"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'New Customer'",
+            "fieldname": "requirements",
+            "fieldtype": "Select",
+            "label": "Requirements",
+            "options": "\nPhotos\nVideos\nBoth",
+            "mandatory_depends_on": "eval:doc.appointment_type == 'New Customer'"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'New Customer'",
+            "fieldname": "budget",
+            "fieldtype": "Select",
+            "label": "Budget",
+            "options": "\nLow\nMedium\nOpen",
+            "mandatory_depends_on": "eval:doc.appointment_type == 'New Customer'"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'New Customer'",
+            "fieldname": "notes",
+            "fieldtype": "Small Text",
+            "label": "Notes",
+            "default": "Please check our previous projects and determine your requirements and one of our sales team will contact you ASAP"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'New Customer'",
+            "fieldname": "references",
+            "fieldtype": "Small Text",
+            "label": "References",
+            "description": "Here you can share links from videos and photos that you like"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
+            "fieldname": "current_client_section",
+            "fieldtype": "Section Break",
+            "label": "Current Active Client Details"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
+            "fieldname": "brand_name",
+            "fieldtype": "Data",
+            "label": "Name of Your Brand",
+            "mandatory_depends_on": "eval:doc.appointment_type == 'Current Active Client'"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
+            "fieldname": "acknowledgment_checkbox",
+            "fieldtype": "Check",
+            "label": "I acknowledge the cancellation policy",
+            "mandatory_depends_on": "eval:doc.appointment_type == 'Current Active Client'"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
+            "fieldname": "column_break_2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
+            "fieldname": "current_client_notes",
+            "fieldtype": "Small Text",
+            "label": "Notes",
+            "default": "Please make sure you are an active client with us, if you are not a client with us the appointment will cancel automatically.\n\nNote 1: If you want to cancel you should cancel before 48 H at least or we will consider the shoot are done.\n\nNote 2: Storyboard and mood board will be discussed with operation manager before shooting."
+        },
+        {
+            "depends_on": "eval:doc.appointment_type == 'Current Active Client'",
+            "fieldname": "current_client_references",
+            "fieldtype": "Small Text",
+            "label": "References",
+            "description": "Here you can share links from videos and photos that you like"
+        },
+        {
+            "fieldname": "location_section",
+            "fieldtype": "Section Break",
+            "label": "Meeting Location"
+        },
+        {
+            "fieldname": "meeting_location",
+            "fieldtype": "Select",
+            "label": "Meeting Location",
+            "options": "Our Location\nCustomer Location",
+            "reqd": 1
+        },
+        {
+            "depends_on": "eval:doc.meeting_location == 'Our Location'",
+            "fieldname": "company_location",
+            "fieldtype": "Small Text",
+            "label": "Company Location",
+            "read_only": 1
+        },
+        {
+            "depends_on": "eval:doc.meeting_location == 'Customer Location'",
+            "fieldname": "customer_location_details",
+            "fieldtype": "Section Break",
+            "label": "Customer Location Details"
+        },
+        {
+            "depends_on": "eval:doc.meeting_location == 'Customer Location'",
+            "fieldname": "location",
+            "fieldtype": "Data",
+            "label": "Location",
+            "mandatory_depends_on": "eval:doc.meeting_location == 'Customer Location'"
+        },
+        {
+            "depends_on": "eval:doc.meeting_location == 'Customer Location'",
+            "fieldname": "street_name",
+            "fieldtype": "Data",
+            "label": "Street Name",
+            "mandatory_depends_on": "eval:doc.meeting_location == 'Customer Location'"
+        },
+        {
+            "depends_on": "eval:doc.meeting_location == 'Customer Location'",
+            "fieldname": "building_name",
+            "fieldtype": "Data",
+            "label": "Building Name and Number",
+            "mandatory_depends_on": "eval:doc.meeting_location == 'Customer Location'"
+        },
+        {
+            "depends_on": "eval:doc.meeting_location == 'Customer Location'",
+            "fieldname": "apartment_number",
+            "fieldtype": "Data",
+            "label": "Apartment Number",
+            "mandatory_depends_on": "eval:doc.meeting_location == 'Customer Location'"
+        },
+        {
+            "fieldname": "booking_section",
+            "fieldtype": "Section Break",
+            "label": "Booking Date & Time"
+        },
+        {
+            "fieldname": "booking_date",
+            "fieldtype": "Date",
+            "label": "Booking Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "booking_time",
+            "fieldtype": "Time",
+            "label": "Booking Time",
+            "reqd": 1
+        },
+        {
+            "default": "Pending",
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "label": "Status",
+            "options": "Pending\nConfirmed\nCancelled\nCompleted"
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Video Production Appointment",
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "is_submittable": 0,
+    "links": [],
+    "modified": "2025-01-27 10:00:00",
+    "modified_by": "Administrator",
+    "module": "Appointment Addons",
+    "name": "Video Production Appointment",
+    "naming_rule": "By \"Naming Series\" field",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Guest",
+            "write": 1
+        }
+    ],
+    "row_format": "Dynamic",
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
 }
-

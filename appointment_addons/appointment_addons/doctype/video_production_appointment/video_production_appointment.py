@@ -20,7 +20,7 @@ class VideoProductionAppointment(Document):
 		elif self.appointment_type == "Current Active Client":
 			if not self.brand_name:
 				frappe.throw("Name of Your Brand is required for Current Active Client appointments")
-			if not self.schedule_date:
+			if not self.booking_date:
 				frappe.throw("Schedule is required for Current Active Client appointments")
 			if not self.acknowledgment_checkbox:
 				frappe.throw("Please acknowledge the cancellation policy")

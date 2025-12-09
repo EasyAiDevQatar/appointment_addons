@@ -44,10 +44,10 @@ def create_appointment(data):
 			frappe.throw(_("Booking Time is required"))
 		
 		# Validate company
-		company = data.get("company", "Direct Line")
+		company = data.get("company", "Directlines")
 		if company in ["Direct Line", "Directlines"]:
-			company = "Direct Line"  # Normalize to "Direct Line"
-		if company not in ["Easy AI", "Direct Line"]:
+			company = "Directlines"  # Normalize to "Directlines"
+		if company not in ["Easy AI", "Directlines"]:
 			frappe.throw(_("Invalid company selected"))
 		
 		# Create appointment document
