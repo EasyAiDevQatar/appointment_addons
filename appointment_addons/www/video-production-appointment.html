@@ -851,12 +851,12 @@
 			document.getElementById('phone_number_error').style.display = 'none';
 			document.getElementById('email_error').style.display = 'none';
 
-			// Validate Name - letters only
+			// Validate Name - letters only (English and Arabic)
 			if (!name) {
 				document.getElementById('customer_name_error').textContent = '{{ _("Name is required") }}';
 				document.getElementById('customer_name_error').style.display = 'block';
 				isValid = false;
-			} else if (!/^[A-Za-z\s]+$/.test(name)) {
+			} else if (!/^[\p{L}\s]+$/u.test(name)) {
 				document.getElementById('customer_name_error').textContent = '{{ _("Name should contain only letters") }}';
 				document.getElementById('customer_name_error').style.display = 'block';
 				isValid = false;
@@ -1215,7 +1215,7 @@
 
 		// Initialize with placeholder
 		if (!container.textContent.trim()) {
-			container.textContent = 'For videos and photos';
+			container.textContent = 'share links for videos and photos that you like ';
 			container.style.color = '#999';
 			container.classList.add('placeholder');
 		}
@@ -1231,7 +1231,7 @@
 		container.addEventListener('blur', function () {
 			let text = this.innerText.trim();
 			if (text === '') {
-				this.textContent = 'For videos and photos';
+				this.textContent = 'share links for videos and photos that you like ';
 				this.style.color = '#999';
 				this.classList.add('placeholder');
 				if (hiddenInput) hiddenInput.value = '';
