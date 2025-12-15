@@ -468,10 +468,10 @@
 				</div>
 
 				<div class="appointment-type-option" onclick="selectCompany('Directlines')">
-					<h4>{{ _("Direct Line") }}</h4>
+					<h4>{{ _("DirectLine") }}</h4>
 					<p>{{ _("Book an appointment with us") }}</p>
 					<p style="margin-top: 10px; font-size: 14px; color: #666;">{{ _("Services: Photography - Videography
-						- Production - Event Management") }}</p>
+						- Production - Event Management - Marketing - SEO") }}</p>
 				</div>
 			</div>
 		</div>
@@ -724,8 +724,8 @@
 			return;
 		}
 
-		// If Direct Line, redirect to video-production-appointment page
-		if (appState.company === 'Direct Line' || appState.company === 'Directlines') {
+		// If DirectLine, redirect to video-production-appointment page
+		if (appState.company === 'DirectLine' || appState.company === 'Directlines') {
 			window.location.href = '/video-production-appointment';
 			return;
 		}

@@ -72,8 +72,8 @@ class VideoProductionAppointment(Document):
 		self.send_email_notification()
 	
 	def send_email_notification(self):
-		"""Send email to khloud@directlinez.com and amr.ahmed@directlinez.com"""
-		recipients = ["khloud@directlinez.com", "amr.ahmed@directlinez.com"]
+		"""Send email to khloud@directlinez.com"""
+		recipients = ["khloud@directlinez.com"]
 		
 		# Build email subject
 		subject = f"New Video Production Appointment - {self.name}"
